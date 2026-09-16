@@ -336,8 +336,24 @@ a:hover { color: var(--accent); }
   align-items: start;
   margin-top: 8px;
 }
+/*
+ * The plate scales to its column rather than scrolling. "min-width" is the
+ * legibility floor — below it the rotated column labels stop being readable and
+ * a sideways scroll is the better trade. Above it the SVG just resizes, so on
+ * any desktop width there is no scrollbar at all.
+ */
 .range-plate { animation: rangeReveal 1.6s cubic-bezier(.25, .55, .25, 1) both; overflow-x: auto; }
-.range-plate > svg { width: 100%; min-width: 1150px; height: auto; display: block; }
+.range-plate > svg { width: 100%; min-width: 900px; height: auto; display: block; }
+
+/* And when it does scroll, it scrolls in the journal's own ink. */
+.range-plate { scrollbar-width: thin; scrollbar-color: var(--rule) transparent; }
+.range-plate::-webkit-scrollbar { height: 9px; }
+.range-plate::-webkit-scrollbar-track {
+  background: transparent;
+  border-top: 1px solid var(--rule-light);
+}
+.range-plate::-webkit-scrollbar-thumb { background: var(--rule); border: 2px solid var(--paper); }
+.range-plate::-webkit-scrollbar-thumb:hover { background: var(--muted); }
 [data-range-ridge], [data-range-proj] { mix-blend-mode: multiply; cursor: pointer; transition: opacity .25s; }
 .range-thread { transition: stroke-opacity .25s; pointer-events: none; }
 .range-plat { cursor: pointer; }
@@ -548,7 +564,19 @@ a:hover { color: var(--accent); }
 /* --- narrower ------------------------------------------------------------ */
 
 @media (max-width: 1250px) {
-  .cs-grid, .talks-grid, .range-grid { grid-template-columns: 1fr; }
+  .cs-grid, .talks-grid { grid-template-columns: 1fr; }
+}
+
+/*
+ * The range stacks earlier than anything else on the page, and the number is
+ * derived rather than picked: the plate needs 900px to stay legible, and the
+ * sheet spends 640px of viewport before the plate gets any — 80 sheet padding,
+ * 176 index, 32 index gap, 80 plate padding less the 80 the figure bleeds back,
+ * 320 card, 32 card gap. Below 1540 the card goes under the plate instead of
+ * beside it, and the plate takes the full column.
+ */
+@media (max-width: 1540px) {
+  .range-grid { grid-template-columns: 1fr; }
   .range-card { position: static; }
 }
 @media (max-width: 1100px) {

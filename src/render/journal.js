@@ -132,7 +132,7 @@ ${sectionHead("III", "the figures", "working plates")}
 <header class="plate-head">
 <div class="kicker">THE RANGE · 2003–2026</div>
 <h2>The work, drawn as terrain.</h2>
-<p>A résumé flattens twenty-three years into bullets; terrain keeps the shape. Everything I’ve worked with holds a fixed column across the page, and every role I’ve held raises a ridge at the year it began — a peak’s height is how long that skill stayed under my hands, in real years. The personal projects settle alongside as plateaus, each tied back to its column by a dotted thread. Where a column peaks era after era, that’s a through-line; where it falls silent, I’d rather show the gap than smooth it over.</p>
+<p>A résumé flattens twenty-three years into bullets; terrain keeps the shape. Everything I’ve worked with holds a fixed column across the page, and every role I’ve held raises a ridge at the year it began — a peak’s height is how long that skill stayed under my hands, in real years. Where a column peaks era after era, that’s a through-line; where it falls silent, I’d rather show the gap than smooth it over.</p>
 </header>
 <div class="plate-rule">
 <div class="plate-fig">Fig. 3 — the range, 2003–2026</div>
@@ -147,7 +147,7 @@ ${rangeAside(RANGE_INITIAL)}
 </aside>
 </div>
 <footer class="plate-foot">
-<p class="mono">Peak heights are drawn in real years — a skill used through a whole three-year role makes a three-year peak. Watercolor darkness is depth of use; ringed dots are events, ring count by impact, tinted to their ridge. The plateaus at right are settled periods in personal projects; hover one and its skill column lights up across every era.</p>
+<p class="mono">Peak heights are drawn in real years — a skill used through a whole three-year role makes a three-year peak. Watercolor darkness is depth of use; ringed dots are events, ring count by impact, tinted to their ridge. Hover a column to light it across every era; tap one for the eras that touched it, the personal projects among them.</p>
 </footer>
 </div>
 </div>

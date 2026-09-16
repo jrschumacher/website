@@ -3,8 +3,14 @@
 // Skills hold fixed columns across the page; time climbs upward. Each role is
 // founded at the year it began, and its ridge peaks show how long each skill
 // stayed a touch point — in real years, on the same vertical scale as every
-// other ridge. Personal projects settle to the right as plateaus, each keyed
-// back to its column by a dotted thread.
+// other ridge.
+//
+// The personal projects had their own lane of plateaus to the right of the
+// range. It cost ~490px of width — more than the gap between the figure's
+// natural size and its column — so the figure never fit and always scrolled
+// sideways. The lane is gone; the projects still shape the range through the
+// skill columns, where a card names every era that touched a skill, the
+// homelab and OpenTDF among them.
 //
 // The geometry is ported from the design prototype unchanged; only the output
 // changed, from React elements to markup strings, so the Worker can render it
@@ -20,7 +26,6 @@ const BOT = 2002.9;
 const PAD_T = 150;
 const PAD_L = 238;
 const PAD_R = 44;
-const LANE_W = 176;
 
 const F1 = "url(#wc1)";
 const F2 = "url(#wc2)";
@@ -29,7 +34,6 @@ const skillById = Object.fromEntries(skills.map((s) => [s.id, s]));
 const ridgeById = Object.fromEntries(allRidges.map((r) => [r.id, r]));
 const byStart = [...allRidges].sort((a, b) => a.start - b.start);
 const roleRidges = byStart.filter((r) => r.kind === "role");
-const projRidges = byStart.filter((r) => r.kind === "project");
 
 const Y = (t) => PAD_T + (TOP - t) * PPY;
 
@@ -38,7 +42,7 @@ const Y = (t) => PAD_T + (TOP - t) * PPY;
  *
  * A folded family is one wide column standing in for all its skills; an
  * expanded one spreads into a column per skill. Everything downstream — ridge
- * paths, plateaus, threads — reads positions from here, so the whole figure
+ * ridge paths, events, hit targets — reads positions from here, so the figure
  * follows from this one function.
  *
  * @param {string|null} openFam  id of the expanded family, or null for all folded
@@ -72,12 +76,12 @@ export function rangeGeometry(openFam) {
   const colOf = {};
   cols.forEach((c, i) => c.skillIds.forEach((sid) => { colOf[sid] = i; }));
 
+  // Room past the last column for the year ticks in the right margin.
   const mainRight = accX;
-  const zx0 = mainRight + 60;
-  const width = zx0 + projRidges.length * LANE_W + PAD_R + 76;
+  const width = mainRight + PAD_R + 60;
   const height = Math.round(Y(BOT)) + 46;
 
-  return { cols, colOf, mainRight, zx0, width, height };
+  return { cols, colOf, mainRight, width, height };
 }
 
 /** Which columns a ridge touches — the unit of "is this ridge in focus?". */
@@ -96,12 +100,11 @@ function ridgeColumns(ridge, colOf) {
  */
 export function ridgeOpacity(ridge, cols, sel, focusCol) {
   if (focusCol != null && cols[focusCol]) {
-    return cols[focusCol].skillIds.some((sid) => ridge.use[sid]) ? 0.98 : (ridge.kind === "project" ? 0.15 : 0.12);
+    return cols[focusCol].skillIds.some((sid) => ridge.use[sid]) ? 0.98 : 0.12;
   }
-  if (sel && sel.type === "role") return sel.id === ridge.id ? 1 : (ridge.kind === "project" ? 0.3 : 0.22);
-  if (sel && sel.type === "plateau" && ridge.kind === "project") return sel.rid === ridge.id ? 1 : 0.3;
-  if (sel && sel.type === "event" && ridge.kind === "role") return sel.ridge === ridge.id ? 1 : 0.3;
-  return ridge.kind === "project" ? 0.9 : 0.92;
+  if (sel && sel.type === "role") return sel.id === ridge.id ? 1 : 0.22;
+  if (sel && sel.type === "event") return sel.ridge === ridge.id ? 1 : 0.3;
+  return 0.92;
 }
 
 /** The focused column: a hover if there is one, else the selected skill's column. */
@@ -146,10 +149,10 @@ function text(x, y, body, opts = {}) {
 
 // --- the figure --------------------------------------------------------------
 
-/** Ridges, plateaus, events, labels and hit targets — the whole plate. */
+/** Ridges, events, labels and hit targets — the whole plate. */
 export function rangeFigure(state) {
   const geom = rangeGeometry(state.openFam);
-  const { cols, colOf, mainRight, zx0, width, height } = geom;
+  const { cols, colOf, width, height } = geom;
   const sel = state.sel;
   const focusCol = focusColumn(state, geom);
   const focusIds = focusCol != null ? cols[focusCol].skillIds : null;
@@ -206,48 +209,6 @@ export function rangeFigure(state) {
     })
     .join("");
 
-  // The unbidden lane: personal projects as colony casts, plateaus keyed back
-  // to their columns by a dotted thread.
-  const jit = [0, -18, 14, -10, 22, -16, 8, -22, 16, -6];
-  const projShapes = projRidges
-    .map((r, j) => {
-      const baseX = zx0 + LANE_W / 2 + j * LANE_W;
-      const baseY = Y(r.start);
-      const plats = (r.plateaus || []).map((p, i) => ({
-        x: baseX + jit[i % 10] * 1.5,
-        y: Y(p.year),
-        rx: 12 + p.w * 7,
-        ry: 3.5 + p.w * 1.4,
-        col: colOf[p.skill],
-        skill: p.skill,
-        label: p.label,
-        i,
-      }));
-      const hot = sel && ((sel.type === "role" && sel.id === r.id) || (sel.type === "plateau" && sel.rid === r.id));
-      const links = plats
-        .map((pl) => {
-          const cx = cols[pl.col].x;
-          const d = `M ${fmt(pl.x - pl.rx)} ${fmt(pl.y)} C ${fmt(pl.x - pl.rx - 100)} ${fmt(pl.y + 9)} ${fmt(cx + 110)} ${fmt(pl.y + 9)} ${fmt(cx)} ${fmt(pl.y)}`;
-          const lit = (focusIds && focusIds.includes(pl.skill)) || hot;
-          return `<path class="range-thread" data-range-link-col="${pl.col}" d="${d}" fill="none" stroke="${esc(r.color)}" stroke-opacity="${lit ? 0.55 : 0.12}" stroke-dasharray="3 4" stroke-width="1"/>`;
-        })
-        .join("");
-      const ellipses = plats
-        .map((pl) => `<ellipse class="range-plat" data-range-act="plateau:${esc(r.id)}:${pl.i}" data-range-hov="${pl.col}" cx="${fmt(pl.x)}" cy="${fmt(pl.y)}" rx="${fmt(pl.rx)}" ry="${fmt(pl.ry)}" fill="${esc(r.color)}" fill-opacity="0.4" stroke="${esc(r.color)}" stroke-opacity="0.8" stroke-width="1" filter="${F1}"/>`)
-        .join("");
-      return {
-        markup: `<g class="wash" data-range-proj="${esc(r.id)}" data-range-cols="${ridgeColumns(r, colOf).join(" ")}" opacity="${ridgeOpacity(r, cols, sel, focusCol)}">
-${links}
-<ellipse cx="${fmt(baseX)}" cy="${fmt(baseY)}" rx="26" ry="5" fill="#7b5f3f" fill-opacity="0.3" filter="${F1}"/>
-${ellipses}
-</g>`,
-        baseX,
-        baseY,
-        plats,
-        ridge: r,
-      };
-    });
-
   // Role founding lines, nudged apart so no two labels collide.
   const roleLines = roleRidges
     .map((r) => `<line x1="${PAD_L}" y1="${fmt(Y(r.start))}" x2="${width - PAD_R}" y2="${fmt(Y(r.start))}" stroke="${esc(r.color)}" stroke-opacity="0.28" stroke-dasharray="2 5"/>`)
@@ -301,11 +262,6 @@ ${rings}
         attrs: `data-range-collab="${i}" data-range-act="${c.type === "fam" ? `fam:${esc(c.fam)}` : `skill:${esc(c.sid)}`}"`,
       });
     }),
-    text(zx0 + (projRidges.length * LANE_W) / 2, 16, "the unbidden · personal projects", { anchor: "middle", fill: "#b03b1e", spacing: 2, size: 10 }),
-    `<line x1="${fmt(zx0 + 10)}" y1="23" x2="${fmt(zx0 + projRidges.length * LANE_W - 10)}" y2="23" stroke="#b03b1e" stroke-opacity="0.4"/>`,
-    `<line x1="${fmt(mainRight + 30)}" y1="${PAD_T - 8}" x2="${fmt(mainRight + 30)}" y2="${height - 40}" stroke="#2a241b" stroke-opacity="0.14" stroke-dasharray="2 6"/>`,
-    ...projShapes.map((p) => text(p.baseX, p.baseY + 26, p.ridge.title.toLowerCase(), { anchor: "middle", fill: p.ridge.color, size: 10, cls: "pick", attrs: `data-range-act="role:${esc(p.ridge.id)}"` })),
-    ...projShapes.flatMap((p) => p.plats.filter((pl) => pl.label).map((pl) => text(pl.x + pl.rx + 7, pl.y + 3, pl.label, { size: 9, style: "italic", fill: "#6a5c44" }))),
   ].join("");
 
   const hits = cols
@@ -321,7 +277,6 @@ ${gridLines}
 ${guide}
 ${tickLines}
 ${ridgeShapes}
-${projShapes.map((p) => p.markup).join("")}
 ${roleLines}
 ${eventShapes}
 ${labels}
@@ -332,7 +287,7 @@ ${hits}
 /** "46 columns … · 1 peak-year = 46px" — the scale note beside the figure title. */
 export function rangeScaleNote(openFam) {
   const { cols } = rangeGeometry(openFam);
-  return `${cols.length} columns (${skills.length} skills in ${fams.length} families) · ${allRidges.length} ridges · 1 peak-year = ${PPY}px`;
+  return `${cols.length} columns (${skills.length} skills in ${fams.length} families) · ${roleRidges.length} ridges · 1 peak-year = ${PPY}px`;
 }
 
 // --- the card ----------------------------------------------------------------
@@ -344,9 +299,9 @@ const KEY_CARD = {
   isSel: false,
   flag: false,
   story:
-    "Skills hold fixed columns across the page; time climbs upward. Each role is founded at the year it began — its ridge peaks show how long each skill stayed a touch point, in real years on the same vertical scale. To the right, personal projects settle as plateaus, each keyed back to its skill column with a dotted thread. Tap a ridge, a column, a plateau, or an event dot. The skill families start folded into single columns — tap a family header to spread its skills out.",
+    "Skills hold fixed columns across the page; time climbs upward. Each role is founded at the year it began — its ridge peaks show how long each skill stayed a touch point, in real years on the same vertical scale. Tap a ridge, a column, or an event dot; a column's card names every era that touched it, the personal projects included. The skill families start folded into single columns — tap a family header to spread its skills out.",
   facts: [
-    "6 families · 46 skills · 11 role ridges · 2 projects",
+    "6 families · 46 skills · 11 role ridges",
     "peak height = years of touch, not strength",
     "families start folded — expand for their columns",
   ],
@@ -410,25 +365,6 @@ function cardFor(sel) {
         : "No recorded touch points in this column yet.",
       facts,
       flag,
-    };
-  }
-
-  if (sel.type === "plateau") {
-    const r = ridgeById[sel.rid];
-    const p = r.plateaus[sel.i];
-    const s = skillById[p.skill];
-    return {
-      kicker: `PLATEAU · ${yr(p.year)}`,
-      title: p.label || s.name,
-      tint: r.color,
-      isSel: true,
-      story: `A settled period in ${r.title.toLowerCase()}, on the ${s.name} column. Plateaus are periods of rest and accumulation; the dotted thread ties this one back to its column in the main range.`,
-      facts: [
-        `column: ${s.name}`,
-        `project: ${r.title.toLowerCase()} · ${yr(r.start)}–${yr(r.end)}`,
-        `settled ~${yr(p.year)}`,
-      ],
-      flag: "begun with nobody asking",
     };
   }
 
@@ -525,18 +461,8 @@ export function applyRangeFocus(root, state) {
     guide.setAttribute("opacity", focusCol == null ? 0 : 0.07);
   }
 
-  for (const g of root.querySelectorAll("[data-range-ridge], [data-range-proj]")) {
-    const id = g.dataset.rangeRidge || g.dataset.rangeProj;
-    g.setAttribute("opacity", ridgeOpacity(ridgeById[id], cols, state.sel, focusCol));
-  }
-
-  for (const path of root.querySelectorAll("[data-range-link-col]")) {
-    const proj = path.closest("[data-range-proj]");
-    const sel = state.sel;
-    const hot = sel && ((sel.type === "role" && sel.id === proj.dataset.rangeProj)
-      || (sel.type === "plateau" && sel.rid === proj.dataset.rangeProj));
-    const lit = (focusCol != null && Number(path.dataset.rangeLinkCol) === focusCol) || hot;
-    path.setAttribute("stroke-opacity", lit ? 0.55 : 0.12);
+  for (const g of root.querySelectorAll("[data-range-ridge]")) {
+    g.setAttribute("opacity", ridgeOpacity(ridgeById[g.dataset.rangeRidge], cols, state.sel, focusCol));
   }
 
   for (const label of root.querySelectorAll("[data-range-collab]")) {

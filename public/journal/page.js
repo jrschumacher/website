@@ -96,10 +96,9 @@ function wireRange() {
   };
 
   const parse = (act) => {
-    const [kind, a, b] = act.split(":");
+    const [kind, a] = act.split(":");
     if (kind === "role") return { type: "role", id: a };
     if (kind === "skill") return { type: "skill", id: a };
-    if (kind === "plateau") return { type: "plateau", rid: a, i: Number(b) };
     if (kind === "event") return { type: "event", k: Number(a) };
     return null;
   };
