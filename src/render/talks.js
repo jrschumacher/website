@@ -111,6 +111,9 @@ export function renderDeckPage(deck) {
     description: meta.summary || undefined,
     current: "talks",
     head,
+    // A deck brings its own typography in `head`; the site's fonts would be a
+    // second stylesheet link the deck never asked for.
+    fonts: false,
     body: `<header class="deck-intro">
   <h1 class="page-title">${e(meta.title)}</h1>
   ${sub ? `<p class="post-meta">${sub}</p>` : ""}
