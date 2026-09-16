@@ -1,4 +1,4 @@
-// GET /           — the résumé, as HTML. The homepage.
+// GET /resume     — the résumé, as HTML.
 // GET /resume.txt — the same résumé, as plain text.
 
 import { DEFAULT_TARGET } from "../config.js";

@@ -1,4 +1,4 @@
-// aboldnewlook.com — one Worker, two D1 bindings, no build step, no client JS.
+// aboldnewlook.com — one Worker, two D1 bindings, no build step.
 //
 //   RESUME -> resume-public   (profile, companies, roles, accomplishments, targets)
 //   BLOG   -> personal-blog   (posts, revisions, tags, post_tags, source_ideas)
@@ -7,6 +7,7 @@
 // design: the private job-pipeline data lives in a different database that this
 // Worker has no binding to and therefore cannot reach.
 
+import { handleHome } from "./routes/home.js";
 import { handleResumeHtml, handleResumeText } from "./routes/resume.js";
 import { handleBlogIndex, handleBlogPost } from "./routes/blog.js";
 import { layout } from "./render/layout.js";
@@ -24,7 +25,7 @@ function notFound() {
       title: "Not found — Ryan Schumacher",
       body: `<h1 class="page-title">Not found</h1>
 <p class="page-lede">There is nothing at this address.</p>
-<div class="empty"><p><a href="/">Résumé</a> · <a href="/blog">Blog</a></p></div>`,
+<div class="empty"><p><a href="/">The record</a> · <a href="/blog">Blog</a> · <a href="/resume">Résumé</a></p></div>`,
     }),
     { status: 404, headers: { "content-type": "text/html; charset=utf-8" } },
   );
@@ -54,6 +55,8 @@ export default {
     try {
       let response;
       if (path === "/") {
+        response = await handleHome();
+      } else if (path === "/resume") {
         response = await handleResumeHtml(request, env);
       } else if (path === "/resume.txt") {
         response = await handleResumeText(request, env);

@@ -1,6 +1,9 @@
-// The one page shell. Every HTML response goes through here, so the nav, the
-// stylesheet and the <head> exist in exactly one place. No client JS: there is
-// nothing on this site that needs it.
+// The shell for every page that is not the homepage: /resume, /blog, /blog/:slug
+// and the 404. The nav, the stylesheet and the <head> exist in exactly one place.
+//
+// The homepage has its own document (src/render/journal.js): it carries the
+// field journal's own index and colophon instead of this nav and footer, and it
+// is the only page on the site that loads a script.
 
 import { escapeHtml } from "../format.js";
 import { SITE_STYLESHEET } from "./css.js";
@@ -8,10 +11,15 @@ import { SITE_STYLESHEET } from "./css.js";
 const e = escapeHtml;
 
 const NAV = [
-  { href: "/", label: "Résumé", key: "resume" },
+  { href: "/", label: "The record", key: "home" },
   { href: "/blog", label: "Blog", key: "blog" },
+  { href: "/resume", label: "Résumé", key: "resume" },
   { href: "/resume.txt", label: "Plain text", key: "text" },
 ];
+
+const FONTS = `<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin="anonymous">
+<link href="https://fonts.googleapis.com/css2?family=EB+Garamond:ital,wght@0,400;0,500;0,600;1,400&amp;family=IBM+Plex+Mono:wght@400;500&amp;display=swap" rel="stylesheet">`;
 
 function nav(current) {
   const items = NAV.map((item) => {
@@ -26,9 +34,12 @@ function nav(current) {
  * @param {string} opts.title        <title> text (already plain, escaped here)
  * @param {string} [opts.description] meta description
  * @param {string} [opts.current]    nav key to mark as current
+ * @param {string} [opts.stylesheet] CSS to inline; the blog/404 sheet by default
+ * @param {boolean} [opts.fonts]     link Google Fonts (false for /resume, which
+ *                                   is set in the résumé's own print families)
  * @param {string} opts.body         markup for the <main class="page"> element
  */
-export function layout({ title, description, current, body }) {
+export function layout({ title, description, current, stylesheet, fonts = true, body }) {
   const desc = description
     ? `<meta name="description" content="${e(description)}">`
     : "";
@@ -39,7 +50,8 @@ export function layout({ title, description, current, body }) {
 <meta name="viewport" content="width=device-width, initial-scale=1">
 <title>${e(title)}</title>
 ${desc}
-<style>${SITE_STYLESHEET}</style>
+${fonts ? FONTS : ""}
+<style>${stylesheet ?? SITE_STYLESHEET}</style>
 </head>
 <body>
 ${nav(current)}

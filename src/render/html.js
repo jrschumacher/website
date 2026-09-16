@@ -5,6 +5,7 @@
 
 import { escapeHtml } from "../format.js";
 import { layout } from "./layout.js";
+import { RESUME_STYLESHEET } from "./css.js";
 
 const e = escapeHtml;
 
@@ -122,6 +123,8 @@ export function renderHtml(resume) {
     title: resume.name || "Résumé",
     description: resume.headline || undefined,
     current: "resume",
+    stylesheet: RESUME_STYLESHEET,
+    fonts: false,
     body: resumeBody(resume),
   });
 }

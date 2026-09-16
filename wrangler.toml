@@ -4,6 +4,10 @@ compatibility_date = "2025-04-01"
 
 # Static assets (robots.txt, and anything else that is a file, not a page).
 # Non-asset requests fall through to the router in src/worker.js.
+#
+# ./public/journal also holds the homepage's figure modules. They are served
+# from here for the browser AND imported by the Worker for server rendering —
+# one copy of the geometry, two consumers. See public/journal/README.md.
 [assets]
 directory = "./public"
 
