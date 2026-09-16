@@ -66,14 +66,15 @@ filters over the whole figure, and that is felt.
 
 ### Still open, by design
 
-Three things the design handoff marked unfinished, left unfinished here:
+The portrait is in: `public/portrait.jpg`, 900×900, sized so it stays sharp at
+3× in a 232×280 frame. To replace it, overwrite that file — `src/portrait.js`
+asks the assets binding for `portrait.jpg`, `.jpeg`, `.png` or `.webp` in turn,
+once per isolate, so a different extension works too and no code changes.
+`PORTRAIT` in `src/config.js` is only an override, for a filename those four
+candidates miss or an image hosted elsewhere.
 
-- **The portrait** is an empty frame. Drop `portrait.jpg` (or `.jpeg`, `.png`,
-  `.webp`) into `public/` and the slot becomes the image on the next deploy —
-  same frame, same tape, same tilt. No code change: `src/portrait.js` asks the
-  assets binding whether the file is there, once per isolate, and the frame
-  stays empty until it is. `PORTRAIT` in `src/config.js` is only an override,
-  for a filename those four candidates miss or an image hosted elsewhere.
+Two things the design handoff marked unfinished, left unfinished here:
+
 - **The talks** in `public/journal/data/site.js` are placeholders with no decks
   to link to. A talk with an empty `href` renders as a dead front card on
   purpose — give it an `href` and the card becomes a link.
