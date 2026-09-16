@@ -10,6 +10,7 @@
 import { handleHome } from "./routes/home.js";
 import { handleResumeHtml, handleResumeText } from "./routes/resume.js";
 import { handleBlogIndex, handleBlogPost } from "./routes/blog.js";
+import { handleTalksIndex, handleTalk, handlePatternSvg } from "./routes/talks.js";
 import { layout } from "./render/layout.js";
 
 function plain(body, status) {
@@ -50,7 +51,16 @@ export default {
       });
     }
 
-    const path = normalize(new URL(request.url).pathname);
+    const url = new URL(request.url);
+
+    // One canonical address. www is served only so it does not fail, and it
+    // redirects rather than duplicating every page at a second URL.
+    if (url.hostname === "www.aboldnewlook.com") {
+      url.hostname = "aboldnewlook.com";
+      return Response.redirect(url.toString(), 301);
+    }
+
+    const path = normalize(url.pathname);
 
     try {
       let response;
@@ -65,6 +75,13 @@ export default {
       } else if (path.startsWith("/blog/")) {
         const slug = decodeURIComponent(path.slice("/blog/".length));
         response = slug ? await handleBlogPost(request, env, slug) : null;
+      } else if (path === "/talks") {
+        response = await handleTalksIndex(request, env);
+      } else if (path.startsWith("/talks/")) {
+        const slug = decodeURIComponent(path.slice("/talks/".length));
+        response = slug ? await handleTalk(request, env, slug) : null;
+      } else if (path === "/deck/pattern.svg") {
+        response = await handlePatternSvg(request, env);
       }
 
       if (!response) response = notFound();

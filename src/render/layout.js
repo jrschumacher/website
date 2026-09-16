@@ -13,6 +13,7 @@ const e = escapeHtml;
 const NAV = [
   { href: "/", label: "The record", key: "home" },
   { href: "/blog", label: "Blog", key: "blog" },
+  { href: "/talks", label: "Talks", key: "talks" },
   { href: "/resume", label: "Résumé", key: "resume" },
   { href: "/resume.txt", label: "Plain text", key: "text" },
 ];
@@ -37,9 +38,12 @@ function nav(current) {
  * @param {string} [opts.stylesheet] CSS to inline; the blog/404 sheet by default
  * @param {boolean} [opts.fonts]     link Google Fonts (false for /resume, which
  *                                   is set in the résumé's own print families)
+ * @param {string} [opts.head]       extra markup for <head>; the deck pages use
+ *                                   it to add their own stylesheet
  * @param {string} opts.body         markup for the <main class="page"> element
+ * @param {string} [opts.head]       extra markup for <head> (stylesheets, font links)
  */
-export function layout({ title, description, current, stylesheet, fonts = true, body }) {
+export function layout({ title, description, current, stylesheet, fonts = true, head, body }) {
   const desc = description
     ? `<meta name="description" content="${e(description)}">`
     : "";
@@ -52,6 +56,7 @@ export function layout({ title, description, current, stylesheet, fonts = true, 
 ${desc}
 ${fonts ? FONTS : ""}
 <style>${stylesheet ?? SITE_STYLESHEET}</style>
+${head ?? ""}
 </head>
 <body>
 ${nav(current)}
