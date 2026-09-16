@@ -12,18 +12,26 @@
 
 import { parseDeck, parseDeckMeta } from "./parse.js";
 
-import configFilesAreAnApi from "../../decks/config-files-are-an-api.md";
+// One line per deck, and the list must match decks/ exactly: an import of a
+// file that is not there fails the bundle, and a file with no import is a deck
+// the site cannot serve. `registry-covers-decks.test.mjs` holds both halves.
+//
+// These three were imported here but never committed, so the bundle could not
+// build at all. They still serve on production, deployed from a machine that
+// had them on disk:
+//
+//     decks/config-files-are-an-api.md
+//     decks/reading-your-own-logs.md
+//     decks/why-your-sdk-needs-a-changelog.md
+//
+// Drop those files into decks/ and the coverage test will name them until
+// their two lines are added back here.
 import generationGaveUsTheSurface from "../../decks/generation-gave-us-the-surface.md";
-import readingYourOwnLogs from "../../decks/reading-your-own-logs.md";
 import slidecard from "../../decks/slidecard.md";
-import whyYourSdkNeedsAChangelog from "../../decks/why-your-sdk-needs-a-changelog.md";
 
 const SOURCES = new Map([
-  ["config-files-are-an-api", configFilesAreAnApi],
   ["generation-gave-us-the-surface", generationGaveUsTheSurface],
-  ["reading-your-own-logs", readingYourOwnLogs],
   ["slidecard", slidecard],
-  ["why-your-sdk-needs-a-changelog", whyYourSdkNeedsAChangelog],
 ]);
 
 /** slug -> fully parsed deck. Populated on first successful getDeck(). */

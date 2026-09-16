@@ -1,6 +1,6 @@
 import { test } from "node:test";
 import assert from "node:assert/strict";
-import { readFileSync } from "node:fs";
+import { readFileSync, readdirSync } from "node:fs";
 import { parseDeck, parseDeckMeta } from "../src/talks/parse.js";
 
 // The registry imports decks/*.md as text, which only the wrangler bundler can
@@ -1091,14 +1091,14 @@ test("decks/generation-gave-us-the-surface.md parses, and every slide is well-fo
   assert.equal(new Set(slides.map((s) => String(s.pos))).size, slides.length, "positions are unique");
 });
 
+// Reads decks/ rather than a hardcoded list, so it covers whatever is there -
+// including a deck added tomorrow - and cannot name a file that does not exist.
 test("every deck in decks/ parses and has unique positions", () => {
-  for (const slug of [
-    "config-files-are-an-api",
-    "generation-gave-us-the-surface",
-    "reading-your-own-logs",
-    "slidecard",
-    "why-your-sdk-needs-a-changelog",
-  ]) {
+  const slugs = readdirSync(new URL("../decks/", import.meta.url))
+    .filter((f) => f.endsWith(".md") && !f.endsWith(".ledger.md"))
+    .map((f) => f.replace(/\.md$/, ""));
+  assert.ok(slugs.length > 0, "decks/ should not be empty");
+  for (const slug of slugs) {
     const { meta, slides } = parseDeck(deck(slug));
     assert.ok(meta.title, `${slug}: title`);
     assert.ok(slides.length > 0, `${slug}: slides`);
