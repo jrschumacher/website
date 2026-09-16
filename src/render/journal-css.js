@@ -354,10 +354,7 @@ a:hover { color: var(--accent); }
 }
 .range-plate::-webkit-scrollbar-thumb { background: var(--rule); border: 2px solid var(--paper); }
 .range-plate::-webkit-scrollbar-thumb:hover { background: var(--muted); }
-[data-range-ridge], [data-range-proj] { mix-blend-mode: multiply; cursor: pointer; transition: opacity .25s; }
-.range-thread { transition: stroke-opacity .25s; pointer-events: none; }
-.range-plat { cursor: pointer; }
-.range-plat:hover { fill-opacity: 0.72; }
+[data-range-ridge] { mix-blend-mode: multiply; cursor: pointer; transition: opacity .25s; }
 .range-ev { cursor: pointer; }
 .range-ev:hover { stroke-width: 2.6; }
 
@@ -557,7 +554,7 @@ a:hover { color: var(--accent); }
 
 @media (prefers-reduced-motion: reduce) {
   .range-plate, .grow-evcard, .grow-reccard, .grow-ink { animation: none !important; }
-  .grow-fade, .talk-card, .grow-step, [data-range-ridge], [data-range-proj], .range-thread { transition: none !important; }
+  .grow-fade, .talk-card, .grow-step, [data-range-ridge] { transition: none !important; }
   html { scroll-behavior: auto !important; }
 }
 
