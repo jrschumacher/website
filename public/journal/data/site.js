@@ -27,13 +27,13 @@ export const caseStudies = [
 // Field notes. `href` points a note off-site; `flag` says the honest thing about
 // it. Excerpts are the opening lines of the pieces themselves, not summaries.
 export const notes = [
-  { date: '2019-12', title: 'Architecting a Privacy-Focused Chat', source: 'medium',
+  { date: '2019-12', title: 'Architecting a Privacy-Focused Chat Application, Part 1 of 3', source: 'medium',
     href: 'https://medium.com/virtru/architecting-a-privacy-focused-chat-782eded9286c',
     excerpt: 'I\u2019ve heard it said that Slack is the elephant in the room when it comes to security. From my personal experience, it\u2019s very true. Unless one is very informed on security and takes privacy seriously there are serious security issues that arise from convenience\u2026',
-    flag: 'part one of three \u2014 parts two and three were never written' },
+    flag: 'parts two and three were never written' },
   { date: '2014-06', title: 'Development is about\u2026 people.', source: 'medium',
     href: 'https://medium.com/@jrschumacher/development-is-about-people-86487e153ecc',
-    excerpt: 'We develop to express our inner creativeness. It is one of the best feelings when someone uses and enjoys our work. Likewise it is a terrible feeling when they don\u2019t\u2026' },
+    excerpt: 'Technology is a tool \u2014 people are the engine. We develop to express our inner creativeness. It is one of the best feelings when someone uses and enjoys our work\u2026' },
 ];
 
 // point a talk's href at its deck page when one exists
