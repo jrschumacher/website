@@ -68,9 +68,12 @@ filters over the whole figure, and that is felt.
 
 Three things the design handoff marked unfinished, left unfinished here:
 
-- **The portrait** is an empty frame. Drop a file in `public/` and point
-  `PORTRAIT` in `src/config.js` at it; the slot becomes the image, same frame,
-  same tape, same tilt.
+- **The portrait** is an empty frame. Drop `portrait.jpg` (or `.jpeg`, `.png`,
+  `.webp`) into `public/` and the slot becomes the image on the next deploy —
+  same frame, same tape, same tilt. No code change: `src/portrait.js` asks the
+  assets binding whether the file is there, once per isolate, and the frame
+  stays empty until it is. `PORTRAIT` in `src/config.js` is only an override,
+  for a filename those four candidates miss or an image hosted elsewhere.
 - **The talks** in `public/journal/data/site.js` are placeholders with no decks
   to link to. A talk with an empty `href` renders as a dead front card on
   purpose — give it an `href` and the card becomes a link.

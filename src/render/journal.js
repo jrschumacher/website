@@ -7,7 +7,6 @@
 // already reads without it.
 
 import { escapeHtml } from "../format.js";
-import { PORTRAIT } from "../config.js";
 import { caseDiagram } from "./diagrams.js";
 import { JOURNAL_STYLESHEET, talkStackRules } from "./journal-css.js";
 import { sections, caseStudies, notes, talks, contact } from "../../public/journal/data/site.js";
@@ -54,9 +53,10 @@ ${items}
 </aside>`;
 }
 
-function portrait() {
-  const slot = PORTRAIT
-    ? `<img src="${e(PORTRAIT)}" alt="Ryan Schumacher" class="portrait-img">`
+/** @param {string|null} src  resolved by src/portrait.js, null while the frame is empty */
+function portrait(src) {
+  const slot = src
+    ? `<img src="${e(src)}" alt="Ryan Schumacher" class="portrait-img" width="232" height="280">`
     : `<div class="portrait-slot" role="img" aria-label="Portrait not yet supplied"><span>drop a portrait</span></div>`;
   return `<figure class="portrait">
 <div class="portrait-frame"><div class="tape"></div>${slot}</div>
@@ -64,11 +64,11 @@ function portrait() {
 </figure>`;
 }
 
-function about() {
+function about(portraitSrc) {
   return `<section id="about" data-site-section class="sec-about">
 ${sectionHead("I", "the practitioner", "the record, in prose first")}
 <div class="about-body">
-${portrait()}
+${portrait(portraitSrc)}
 <div class="about-prose">
 <h2>Ryan Schumacher — principal engineer in data-centric security &amp; identity.</h2>
 <p>I build the platforms underneath data security: identity federation (OIDC, DPoP, token exchange), enterprise key management (HSM, KMS, KAS), and policy-driven access control on open-source foundations. Currently Director of Platform at Virtru, leading the engineering organization behind the Data Security Platform and OpenTDF — software that runs air-gapped and as distributed SaaS. Before that: engineering manager, staff engineer, bank lead, and co-founder of three ventures over nine years.</p>
@@ -277,8 +277,14 @@ function colophon() {
 </footer>`;
 }
 
-/** The whole homepage, as one document. */
-export function renderJournal() {
+/**
+ * The whole homepage, as one document.
+ *
+ * @param {object} [opts]
+ * @param {string|null} [opts.portrait] image URL for section I, or null for the
+ *   empty frame. Resolved by the route, so this stays a pure function of data.
+ */
+export function renderJournal({ portrait: portraitSrc = null } = {}) {
   return `<!doctype html>
 <html lang="en">
 <head>
@@ -303,7 +309,7 @@ export function renderJournal() {
 <div class="site-grid" data-site-grid>
 ${index()}
 <main class="site-main">
-${about()}
+${about(portraitSrc)}
 ${growth()}
 ${figures()}
 ${work()}

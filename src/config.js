@@ -14,11 +14,14 @@ export const DEFAULT_TARGET = "principal-security";
 export const SITE_NAME = "aboldnewlook";
 
 /**
- * The portrait in section I of the homepage.
+ * An override for the portrait in section I of the homepage.
  *
- * The design leaves this a drop-slot: until a real photograph exists the page
- * renders the empty frame rather than a stand-in face. Put the file in
- * `public/` and point this at it — `"/portrait.jpg"` — and the slot becomes the
- * image, same frame, same tape, same tilt.
+ * Normally you do not touch this. Drop `portrait.jpg` (or .jpeg/.png/.webp)
+ * into `public/` and the slot becomes the image on the next deploy — same
+ * frame, same tape, same tilt — because `src/portrait.js` looks for it.
+ *
+ * Set this only to name a file those four candidates would miss, or to point
+ * the frame at an image hosted somewhere else. Until a real photograph exists
+ * the page renders the empty frame rather than a stand-in face.
  */
 export const PORTRAIT = null;

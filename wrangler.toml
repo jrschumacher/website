@@ -10,6 +10,9 @@ compatibility_date = "2025-04-01"
 # one copy of the geometry, two consumers. See public/journal/README.md.
 [assets]
 directory = "./public"
+# The Worker reads this too, to ask whether a portrait file exists. Assets are
+# still served first for matching paths; the binding only adds the lookup.
+binding = "ASSETS"
 
 # --- D1: the PUBLIC résumé tables ---
 # Split out of resume-backlog so this Worker has no path to job-hunt data.

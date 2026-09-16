@@ -55,7 +55,7 @@ export default {
     try {
       let response;
       if (path === "/") {
-        response = await handleHome();
+        response = await handleHome(request, env);
       } else if (path === "/resume") {
         response = await handleResumeHtml(request, env);
       } else if (path === "/resume.txt") {
