@@ -456,7 +456,17 @@ a:hover { color: var(--accent); }
 .note { padding: 20px 0 18px; border-bottom: 1px solid var(--rule-light); }
 .note-head { display: flex; align-items: baseline; gap: 16px; flex-wrap: wrap; }
 .note-date { font-size: 10.5px; color: var(--faded); }
-.note-title { font-variant: small-caps; letter-spacing: .06em; font-size: 19px; font-weight: 600; }
+.note-title {
+  font-variant: small-caps;
+  letter-spacing: .06em;
+  font-size: 19px;
+  font-weight: 600;
+  color: var(--ink);
+  text-decoration: none;
+}
+a.note-title:hover { color: var(--accent); }
+.note-source { font-size: 10px; letter-spacing: .14em; color: var(--faded); }
+.note .card-flag { margin-top: 8px; }
 .note-excerpt { margin: 8px 0 0; font-size: 16px; line-height: 1.55; color: var(--body); text-wrap: pretty; }
 
 /* --- VI · talks ---------------------------------------------------------- */

@@ -185,10 +185,18 @@ ${sectionHead("IV", "case studies", "the work, up close")}
 
 function fieldNotes() {
   const entries = notes
-    .map((n) => `<article class="note">
-<div class="note-head"><span class="mono note-date">${e(n.date)}</span><span class="note-title">${e(n.title)}</span></div>
+    .map((n) => {
+      const title = n.href
+        ? `<a class="note-title" href="${e(n.href)}">${e(n.title)}</a>`
+        : `<span class="note-title">${e(n.title)}</span>`;
+      const source = n.source ? `<span class="mono note-source">${e(n.source)} \u2197</span>` : "";
+      const flag = n.flag ? `<div class="card-flag">${e(n.flag)}</div>` : "";
+      return `<article class="note">
+<div class="note-head"><span class="mono note-date">${e(n.date)}</span>${title}${source}</div>
 <p class="note-excerpt">${e(n.excerpt)}</p>
-</article>`)
+${flag}
+</article>`;
+    })
     .join("");
   return `<section id="notes" data-site-section class="sec-notes">
 ${sectionHead("V", "field notes", "short entries from the field")}

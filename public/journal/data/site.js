@@ -24,9 +24,16 @@ export const caseStudies = [
     facts: ['+650% sales on the branded tier', '+5% company ARR', 'zero engineer-hours per customer after launch'], },
 ];
 
+// Field notes. `href` points a note off-site; `flag` says the honest thing about
+// it. Excerpts are the opening lines of the pieces themselves, not summaries.
 export const notes = [
-  { date: '2026-08', title: 'On tearing down twelve services', excerpt: 'The argument for the monolith was never elegance \u2014 it was custody: of keys, of deploys, of the air gap. Elegance arrived later, uninvited\u2026' },
-  { date: '2026-06', title: 'What the homelab taught the platform', excerpt: 'Everything the rack does badly at 2 a.m., the platform will do badly at scale. Field conditions first, architecture second\u2026' },
+  { date: '2019-12', title: 'Architecting a Privacy-Focused Chat', source: 'medium',
+    href: 'https://medium.com/virtru/architecting-a-privacy-focused-chat-782eded9286c',
+    excerpt: 'I\u2019ve heard it said that Slack is the elephant in the room when it comes to security. From my personal experience, it\u2019s very true. Unless one is very informed on security and takes privacy seriously there are serious security issues that arise from convenience\u2026',
+    flag: 'part one of three \u2014 parts two and three were never written' },
+  { date: '2014-06', title: 'Development is about\u2026 people.', source: 'medium',
+    href: 'https://medium.com/@jrschumacher/development-is-about-people-86487e153ecc',
+    excerpt: 'We develop to express our inner creativeness. It is one of the best feelings when someone uses and enjoys our work. Likewise it is a terrible feeling when they don\u2019t\u2026' },
 ];
 
 // point a talk's href at its deck page when one exists
