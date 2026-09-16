@@ -22,6 +22,9 @@ import {
 
 const e = escapeHtml;
 
+/** Shown when D1 cannot be reached; the design's own line, and still true. */
+const NOW_FALLBACK = "now — director of platform, virtru · remote";
+
 /**
  * The Range opens with every family folded — the state the figure is designed
  * to be met in. The Growth opens finished: a reader with no JavaScript should
@@ -64,7 +67,7 @@ function portrait(src) {
 </figure>`;
 }
 
-function about(portraitSrc) {
+function about(portraitSrc, now) {
   return `<section id="about" data-site-section class="sec-about">
 ${sectionHead("I", "the practitioner", "the record, in prose first")}
 <div class="about-body">
@@ -74,7 +77,7 @@ ${portrait(portraitSrc)}
 <p>I build the platforms underneath data security: identity federation (OIDC, DPoP, token exchange), enterprise key management (HSM, KMS, KAS), and policy-driven access control on open-source foundations. Currently Director of Platform at Virtru, leading the engineering organization behind the Data Security Platform and OpenTDF — software that runs air-gapped and as distributed SaaS. Before that: engineering manager, staff engineer, bank lead, and co-founder of three ventures over nine years.</p>
 <p>Twenty-three years of work resist a bulleted list, so this site keeps the record as figures — the same experience in different presentations. Read <a href="#growth">the growth</a> to watch it accumulate era by era, or <a href="#figures">the figures</a> for the ranges and streams it settles into. The boring version is <a href="/resume.txt">/resume.txt</a>.</p>
 <div class="about-facts">
-<div class="fact">now — director of platform, virtru · remote</div>
+<div class="fact">${e(now)}</div>
 <div class="fact">field — identity · keys · policy · platforms · open source</div>
 <div class="fact">since 2003 · auburn cs · the homelab never sleeps</div>
 </div>
@@ -281,8 +284,10 @@ ${navRows}
 </section>`;
 }
 
-function contactSection() {
-  const rows = contact
+/** Section VII, from the résumé's own contact rows; the data file is the fallback. */
+function contactSection(rows) {
+  const list = rows.length ? rows : contact;
+  const cells = list
     .map((c) => `<a href="${e(c.href)}" class="contact-row">
 <span class="mono contact-label">${e(c.label)}</span>
 <span class="contact-value">${e(c.value)}</span>
@@ -290,7 +295,7 @@ function contactSection() {
     .join("");
   return `<section id="contact" data-site-section class="sec-contact">
 ${sectionHead("VII", "contact", "get in touch")}
-<div class="contact-list">${rows}</div>
+<div class="contact-list">${cells}</div>
 </section>`;
 }
 
@@ -309,8 +314,15 @@ function colophon() {
  * @param {string|null} [opts.portrait] image URL for section I, or null for the
  *   empty frame. Resolved by the route, so this stays a pure function of data.
  * @param {object[]} [opts.talks] deck rows for section VI, from the registry.
+ * @param {object[]} [opts.contact] contact rows from D1; falls back to the data file.
+ * @param {string} [opts.now] the current-role line, from D1.
  */
-export function renderJournal({ portrait: portraitSrc = null, talks = [] } = {}) {
+export function renderJournal({
+  portrait: portraitSrc = null,
+  talks = [],
+  contact: contactRows = [],
+  now = null,
+} = {}) {
   return `<!doctype html>
 <html lang="en">
 <head>
@@ -335,13 +347,13 @@ export function renderJournal({ portrait: portraitSrc = null, talks = [] } = {})
 <div class="site-grid" data-site-grid>
 ${index()}
 <main class="site-main">
-${about(portraitSrc)}
+${about(portraitSrc, now ?? NOW_FALLBACK)}
 ${growth()}
 ${figures()}
 ${work()}
 ${fieldNotes()}
 ${talkSection(talks)}
-${contactSection()}
+${contactSection(contactRows)}
 ${colophon()}
 </main>
 </div>

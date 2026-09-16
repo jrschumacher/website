@@ -7,6 +7,7 @@
 import { renderJournal } from "../render/journal.js";
 import { resolvePortrait } from "../portrait.js";
 import { listDecks } from "../talks/registry.js";
+import { loadJournalFacts } from "../journal/facts.js";
 
 /**
  * Section VI, from the deck registry rather than a hand-kept list.
@@ -36,9 +37,19 @@ function talkRows() {
   }
 }
 
+/** The résumé-backed facts, or nulls if D1 is unreachable — never a 500. */
+async function facts(env) {
+  try {
+    return await loadJournalFacts(env.RESUME);
+  } catch (err) {
+    console.error(`journal facts: ${err?.message ?? err}`);
+    return { contact: [], now: null };
+  }
+}
+
 export async function handleHome(request, env) {
-  const portrait = await resolvePortrait(request, env);
-  return new Response(renderJournal({ portrait, talks: talkRows() }), {
+  const [portrait, resume] = await Promise.all([resolvePortrait(request, env), facts(env)]);
+  return new Response(renderJournal({ portrait, talks: talkRows(), ...resume }), {
     headers: {
       "content-type": "text/html; charset=utf-8",
       "cache-control": "public, max-age=300",

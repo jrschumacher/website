@@ -82,3 +82,61 @@ test("the portrait URL is escaped into the attribute", () => {
   assert.doesNotMatch(html, /src="\/x"\.jpg"/);
   assert.match(html, /&quot;/);
 });
+
+// --- the résumé-backed facts --------------------------------------------------
+
+import { loadJournalFacts } from "../src/journal/facts.js";
+
+/** A D1 stand-in: batch() resolves the four statements loadBacklog asks for. */
+function db({ profile = [], roles = [], companies = [] } = {}) {
+  return {
+    prepare: (sql) => ({ sql }),
+    async batch() {
+      return [{ results: companies }, { results: roles }, { results: [] }, { results: profile }];
+    },
+  };
+}
+
+test("contact comes from the résumé's own rows, in a fixed order", async () => {
+  const { contact } = await loadJournalFacts(db({
+    profile: [
+      { section: "contact", key: "linkedin", value: "linkedin.com/in/x" },
+      { section: "contact", key: "email", value: "a@b.c" },
+      { section: "contact", key: "github", value: "github.com/x" },
+      { section: "education", key: "School", value: "ignored" },
+    ],
+  }));
+  assert.deepEqual(contact.map((c) => c.label), ["email", "github", "linkedin"]);
+  assert.equal(contact[0].href, "mailto:a@b.c");
+  assert.equal(contact[1].href, "https://github.com/x");
+});
+
+test("a contact row that is missing is simply absent", async () => {
+  const { contact } = await loadJournalFacts(db({
+    profile: [{ section: "contact", key: "email", value: "a@b.c" }],
+  }));
+  assert.deepEqual(contact.map((c) => c.label), ["email"]);
+});
+
+test("the now line is built from the role still marked present", async () => {
+  const { now } = await loadJournalFacts(db({
+    roles: [
+      { company_key: "v", title: "Director of Platform", end: "present" },
+      { company_key: "v", title: "Staff Architect 2", end: "2025-01" },
+    ],
+    companies: [{ key: "v", display: "Virtru", location: "Remote" }],
+  }));
+  assert.equal(now, "now — director of platform, virtru · remote");
+});
+
+test("no present role means no now line, and the page uses its own", async () => {
+  const { now } = await loadJournalFacts(db({ roles: [{ company_key: "v", title: "Past", end: "2024-01" }] }));
+  assert.equal(now, null);
+  assert.match(renderJournal({ now: null }), /now — director of platform/);
+});
+
+test("D1's contact rows win over the data file, and null falls back", () => {
+  const rows = [{ label: "email", value: "from@d1.test", href: "mailto:from@d1.test" }];
+  assert.match(renderJournal({ contact: rows }), /from@d1\.test/);
+  assert.match(renderJournal({ contact: [] }), /j\.r\.schumacher@gmail\.com/);
+});
