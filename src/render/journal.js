@@ -9,7 +9,7 @@
 import { escapeHtml } from "../format.js";
 import { caseDiagram } from "./diagrams.js";
 import { JOURNAL_STYLESHEET, talkStackRules } from "./journal-css.js";
-import { sections, caseStudies, notes, talks, contact } from "../../public/journal/data/site.js";
+import { sections, caseStudies, notes, contact } from "../../public/journal/data/site.js";
 import { rangeFigure, rangeAside, rangeScaleNote } from "../../public/journal/figures/range.js";
 import {
   growthFigure,
@@ -211,7 +211,24 @@ ${sectionHead("V", "field notes", "short entries from the field")}
  * transparencies come forward, the year list tracks them and prev/next cycle
  * without a line of script — and with keyboard focus for free.
  */
-function talkSection() {
+/**
+ * Section VI: the talk stack, shuffled by `:checked` alone.
+ *
+ * Every arrangement of the stack is a CSS rule (see `talkStackRules`), so the
+ * transparencies come forward, the year list tracks them and prev/next cycle
+ * without a line of script — and with keyboard focus for free.
+ *
+ * @param {{href: string, title: string, year: string, venue: string, summary: string}[]} talks
+ */
+function talkSection(talks) {
+  const head = sectionHead("VI", "talks", "transparencies from the projector");
+  if (!talks.length) {
+    return `<section id="talks" data-site-section class="sec-talks">
+${head}
+<div class="empty"><p>No decks published yet.</p></div>
+</section>`;
+  }
+
   const n = talks.length;
   const radios = talks
     .map((t, i) => `<input type="radio" name="talk" id="talk-${i}" class="talk-radio"${i === 0 ? " checked" : ""}>`)
@@ -222,22 +239,22 @@ function talkSection() {
       const num = `${String(i + 1).padStart(2, "0")} / ${String(n).padStart(2, "0")}`;
       const face = `<div class="talk-face">
 <div class="tape"></div>
-<div class="talk-meta mono"><span>TALK · ${e(t.year)}</span><span>TRANSPARENCY ${e(num)}</span></div>
+<div class="talk-meta mono"><span>TALK${t.year ? ` · ${e(t.year)}` : ""}</span><span>TRANSPARENCY ${e(num)}</span></div>
 <div class="talk-body">
 <div class="talk-title">${e(t.title)}</div>
 <div class="rule-short"></div>
-<div class="talk-venue mono">${e(t.venue)}</div>
+${t.venue ? `<div class="talk-venue mono">${e(t.venue)}</div>` : ""}
+${t.summary ? `<p class="talk-summary">${e(t.summary)}</p>` : ""}
 </div>
-<div class="talk-foot mono"><span>aboldnewlook · title slide</span><span class="talk-open">${t.href ? "open the full talk →" : ""}</span><span class="talk-bring">bring forward</span></div>
+<div class="talk-foot mono"><span>aboldnewlook · title slide</span><span class="talk-open">read the deck →</span><span class="talk-bring">bring forward</span></div>
 </div>`;
-      const wrapped = t.href ? `<a class="talk-link" href="${e(t.href)}">${face}</a>` : face;
-      return `<div class="talk-card talk-card-${i}">${wrapped}<label class="talk-grab" for="talk-${i}"><span class="sr-only">Bring “${e(t.title)}” forward</span></label></div>`;
+      return `<div class="talk-card talk-card-${i}"><a class="talk-link" href="${e(t.href)}">${face}</a><label class="talk-grab" for="talk-${i}"><span class="sr-only">Bring “${e(t.title)}” forward</span></label></div>`;
     })
     .join("");
 
   const navRows = talks
     .map((t, i) => `<label class="talk-nav-row talk-nav-${i}" for="talk-${i}">
-<span class="mono talk-nav-year">${e(t.year)}</span>
+<span class="mono talk-nav-year">${e(t.year || "—")}</span>
 <span class="talk-nav-title">${e(t.title)}</span>
 </label>`)
     .join("");
@@ -251,7 +268,7 @@ function talkSection() {
     .join("");
 
   return `<section id="talks" data-site-section class="sec-talks">
-${sectionHead("VI", "talks", "transparencies from the projector")}
+${head}
 <div class="talks-grid">
 ${radios}
 <div class="talk-stack">${cards}</div>
@@ -291,8 +308,9 @@ function colophon() {
  * @param {object} [opts]
  * @param {string|null} [opts.portrait] image URL for section I, or null for the
  *   empty frame. Resolved by the route, so this stays a pure function of data.
+ * @param {object[]} [opts.talks] deck rows for section VI, from the registry.
  */
-export function renderJournal({ portrait: portraitSrc = null } = {}) {
+export function renderJournal({ portrait: portraitSrc = null, talks = [] } = {}) {
   return `<!doctype html>
 <html lang="en">
 <head>
@@ -322,7 +340,7 @@ ${growth()}
 ${figures()}
 ${work()}
 ${fieldNotes()}
-${talkSection()}
+${talkSection(talks)}
 ${contactSection()}
 ${colophon()}
 </main>

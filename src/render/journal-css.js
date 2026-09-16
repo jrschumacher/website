@@ -503,6 +503,13 @@ a.note-title:hover { color: var(--accent); }
 .talk-title { font-size: clamp(24px, 2.3vw, 34px); font-weight: 500; line-height: 1.2; color: var(--ink); text-wrap: pretty; }
 .talk-body .rule-short { margin: 16px 0 12px; }
 .talk-venue { font-size: 11px; letter-spacing: .1em; color: var(--accent); }
+.talk-summary {
+  margin: 12px 0 0;
+  font-size: 15.5px;
+  line-height: 1.5;
+  color: var(--body-soft);
+  text-wrap: pretty;
+}
 .talk-foot { display: flex; justify-content: space-between; gap: 12px; font-size: 10px; color: var(--muted); margin-top: auto; }
 .talk-open, .talk-bring { display: none; }
 .talk-grab { position: absolute; inset: 0; z-index: 2; cursor: pointer; }

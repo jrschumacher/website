@@ -36,12 +36,9 @@ export const notes = [
     excerpt: 'Technology is a tool \u2014 people are the engine. We develop to express our inner creativeness. It is one of the best feelings when someone uses and enjoys our work\u2026' },
 ];
 
-// point a talk's href at its deck page when one exists
-export const talks = [
-  { year: '2026', title: 'Keys, custody, and the air gap', venue: 'venue tbd', href: '' },
-  { year: '2025', title: 'OIDC as the universal identity layer', venue: 'venue tbd', href: '' },
-  { year: '2024', title: 'The modular monolith, revisited', venue: 'venue tbd', href: '' },
-];
+// Talks are not listed here: section VI renders from the deck registry
+// (src/talks/registry.js), so a deck added to decks/ shows up on the homepage
+// without touching this file.
 
 export const contact = [
   { label: 'email', value: 'j.r.schumacher@gmail.com', href: 'mailto:j.r.schumacher@gmail.com' },
