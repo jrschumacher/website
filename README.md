@@ -146,9 +146,30 @@ npm test          # markdown renderer unit tests
 npm run deploy
 ```
 
-## Custom domain
+## The domain
 
-Not attached. `aboldnewlook.com` is still on Google Domains nameservers
-(`ns-cloud-*.googledomains.com`), so it is not a Cloudflare zone and a Worker
-custom domain cannot be created for it. Move the nameservers to Cloudflare
-first; then add a `routes` / `custom_domain` entry to `wrangler.toml`.
+`aboldnewlook.com` is live and served by this Worker. It is attached with
+**routes**, not a custom domain, and that is deliberate:
+
+```toml
+[[routes]]
+pattern = "aboldnewlook.com/*"
+zone_name = "aboldnewlook.com"
+```
+
+The apex already has proxied A/AAAA records pointing at an nginx origin that
+redirects to ruster.me. A Worker custom domain would require deleting those
+records; a route intercepts the request ahead of the origin and leaves DNS
+untouched — so removing those two stanzas restores the previous behaviour
+exactly. `www` redirects to the apex in the Worker.
+
+(An earlier version of this file said the domain was on Google Domains
+nameservers and could not be attached at all. That stopped being true when the
+zone moved to Cloudflare and the routes went in.)
+
+## `npm test` is not in CI
+
+Cloudflare Workers Builds runs the deploy, and nothing runs `npm test` on push.
+That is worth fixing: a branch can be green in the dashboard while its tests
+fail, which is exactly how three decks referenced by `src/talks/registry.js`
+came to be missing from git without anyone noticing.
