@@ -102,6 +102,21 @@ function educationSection(education) {
     </section>`;
 }
 
+/**
+ * Print, and the machine-readable copies.
+ *
+ * No PDF generator: the stylesheet already carries `@page`, Letter geometry and
+ * the break rules, so the browser's own print path produces the artefact. It is
+ * also the only way to get a PDF that is not styled like the rest of the site,
+ * which is the point — this one is read by recruiters and parsers.
+ */
+function actions() {
+  return `<div class="resume-actions">
+    <button type="button" onclick="window.print()">print / save as pdf</button>
+    <a href="/resume.txt">plain text</a>
+  </div>`;
+}
+
 /** The résumé's inner markup, without the document shell. */
 export function resumeBody(resume) {
   return `<header class="masthead">
@@ -110,6 +125,7 @@ export function resumeBody(resume) {
     <div class="contact">${contactLine(resume.contact)}</div>
   </header>
   ${resume.summary ? `<p class="summary">${e(resume.summary)}</p>` : ""}
+  ${actions()}
   ${highlightsSection(resume.highlights)}
   ${experienceSection(resume.experience)}
   ${skillsSection(resume.skills)}
@@ -124,7 +140,6 @@ export function renderHtml(resume) {
     description: resume.headline || undefined,
     current: "resume",
     stylesheet: RESUME_STYLESHEET,
-    fonts: false,
     body: resumeBody(resume),
   });
 }

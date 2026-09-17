@@ -376,5 +376,131 @@ a:hover { color: var(--accent); }
 /** The blog and the 404. */
 export const SITE_STYLESHEET = SITE_CSS;
 
-/** /resume — the document, plus its nav and footer. */
-export const RESUME_STYLESHEET = RESUME_CSS + RESUME_CHROME;
+// --- /resume on screen -------------------------------------------------------
+//
+// Screen gets the journal; paper does not. A résumé PDF goes to recruiters and
+// ATS parsers, where parchment, small-caps and a coloured rule are all working
+// against it — so every rule here is inside `@media screen` and the printed
+// artefact stays byte-for-byte the document it has always been. `@page`, the
+// break rules and the Letter geometry in RESUME_CSS are untouched.
+const RESUME_SCREEN = `
+@media screen {
+  /* The nav and footer come from RESUME_CHROME in the résumé's own sans; on
+     screen they belong to the site, so they match the blog's masthead rule. */
+  .sitenav {
+    max-width: 800px;
+    margin: 0 auto;
+    padding: 28px 40px 10px;
+    border-bottom: 2px solid #2a241b;
+    font-family: "IBM Plex Mono", ui-monospace, monospace;
+    font-size: 11px;
+    letter-spacing: .14em;
+    text-transform: lowercase;
+    gap: 18px;
+  }
+  .sitenav a { color: #7b5f3f; text-decoration: none; }
+  .sitenav a:hover { color: #b03b1e; }
+  .sitenav a[aria-current="page"] { color: #b03b1e; font-weight: 400; }
+
+  .sitefoot {
+    max-width: 800px;
+    margin: 0 auto;
+    padding: 14px 40px 56px;
+    border-top: 2px solid #2a241b;
+    font-family: "IBM Plex Mono", ui-monospace, monospace;
+    font-size: 11px;
+    line-height: 1.8;
+    color: #8a7a5f;
+  }
+  .sitefoot a { color: #8a7a5f; }
+
+  body {
+    background: #f1ead9;
+    color: #2a241b;
+    font-family: "EB Garamond", Georgia, serif;
+    font-size: 17px;
+    line-height: 1.5;
+  }
+  .page {
+    max-width: 800px;
+    margin: 0 auto;
+    padding: 8px 40px 72px;
+    background: none;
+    box-shadow: none;
+  }
+
+  header.masthead { text-align: left; margin-bottom: 20px; }
+  h1.name { font-size: clamp(30px, 3.4vw, 42px); font-weight: 500; letter-spacing: .01em; }
+  .headline { margin: 6px 0 8px; font-size: 18px; font-style: italic; color: #4a4133; }
+  .contact {
+    font-family: "IBM Plex Mono", ui-monospace, monospace;
+    font-size: 11px;
+    letter-spacing: .1em;
+    color: #7b5f3f;
+  }
+  .contact a { color: #7b5f3f; }
+  .summary { text-align: left; hyphens: none; font-size: 17px; color: #3a3226; text-wrap: pretty; }
+
+  /* The section rule the rest of the site uses: 2px ink over a hairline. */
+  h2.section-title {
+    font-family: inherit;
+    font-variant: small-caps;
+    text-transform: none;
+    letter-spacing: .18em;
+    font-size: 15px;
+    font-weight: 600;
+    color: #2a241b;
+    border-top: 2px solid #2a241b;
+    border-bottom: 1px solid #cfc3a8;
+    padding: 12px 0 8px;
+    margin: 28px 0 10px;
+  }
+  section { margin-top: 0; }
+
+  .company-line, .role-line { font-family: inherit; }
+  .company-name { font-variant: small-caps; letter-spacing: .06em; font-size: 20px; font-weight: 600; }
+  .role-title { font-weight: 600; font-size: 17px; }
+  .role-note { color: #7b5f3f; }
+  .company-loc, .role-dates {
+    font-family: "IBM Plex Mono", ui-monospace, monospace;
+    font-size: 10.5px;
+    letter-spacing: .06em;
+    color: #8a7a5f;
+  }
+  li { margin: 5px 0; color: #3a3226; }
+  .skills-row .cat { font-family: inherit; font-variant: small-caps; letter-spacing: .06em; font-weight: 600; }
+  .education-row .degree { color: #7b5f3f; }
+
+  /* Print / save as PDF, and the way onward to the machine-readable copies. */
+  .resume-actions {
+    display: flex;
+    flex-wrap: wrap;
+    gap: 18px;
+    margin: 22px 0 0;
+    padding-top: 12px;
+    border-top: 1px solid #cfc3a8;
+    font-family: "IBM Plex Mono", ui-monospace, monospace;
+    font-size: 11px;
+    letter-spacing: .12em;
+  }
+  .resume-actions a, .resume-actions button {
+    color: #7b5f3f;
+    background: none;
+    border: 0;
+    padding: 0;
+    font: inherit;
+    letter-spacing: inherit;
+    cursor: pointer;
+    text-decoration: underline;
+    text-underline-offset: 3px;
+  }
+  .resume-actions a:hover, .resume-actions button:hover { color: #b03b1e; }
+}
+
+@media print {
+  .resume-actions { display: none; }
+}
+`;
+
+/** /resume — the document, plus its nav, footer, and the screen-only brand. */
+export const RESUME_STYLESHEET = RESUME_CSS + RESUME_CHROME + RESUME_SCREEN;
