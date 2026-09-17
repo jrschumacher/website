@@ -21,6 +21,9 @@ function contactLine(contact) {
 }
 
 function bulletList(items) {
+  // A role can have no bullets yet — a promotion lands before the writing does.
+  // An empty <ul> would still take its margin and read as a missing paragraph.
+  if (!items.length) return "";
   return `<ul>${items.map((b) => `<li>${e(b)}</li>`).join("")}</ul>`;
 }
 

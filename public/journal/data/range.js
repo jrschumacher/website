@@ -1,6 +1,18 @@
 // Simulated skill-terrain data — the range. Skills are ordered columns (x-axis);
 // each ridge is a role or personal project. use: { skillId: [fractionOfRoleTouched, intensity 1-3] }.
 // Peak height = fraction × role span, drawn in real years. All simulated, shaped by resume.txt.
+//
+// This file is NOT fed from the resume-public database, and cannot be as it
+// stands. Two things it needs are not there: ridges are finer-grained than the
+// résumé's roles (one D1 row, "Co-founder / Engineering Lead 2009–2018", is
+// three ridges here, and the 2003–2009 student roles are not in D1 at all), and
+// nothing in D1 records which skills a role touched or how deeply — the `use`
+// maps below, which are what actually draws the peaks. Wiring the figures to
+// real data means a skills-per-role table first.
+//
+// Divergence from the handoff bundle: the vr-dir ridge's title and story were
+// updated for the Dec 2025 and Aug 2026 promotions. Every number is the
+// handoff's.
 export const fams = [
   { id: 'sys',  name: 'systems & ops' },
   { id: 'lang', name: 'languages' },
@@ -109,13 +121,13 @@ export const ridges = [
       'Developed the DSP premium platform on OpenTDF, opening 37% net-new growth in company ARR.'],
     story: 'Staff architect. Go, the CLI, the monorepo — a deliberately narrow footprint with tall peaks. Focus over width.',
     use: { go: [0.9, 3], monorepo: [0.8, 2], cli: [0.85, 3], sdk: [0.7, 2], rest: [0.5, 1], kubernetes: [0.4, 1], strategy: [0.5, 1], observability: [0.35, 1] } },
-  { id: 'vr-dir', kind: 'role', company: 'Virtru', title: 'Director of Platform', start: 2025.0, end: 2026.65, color: '#16484c',
+  { id: 'vr-dir', kind: 'role', company: 'Virtru', title: 'Director → VP of Engineering, Platform', start: 2025.0, end: 2026.65, color: '#16484c',
     record: ['Lead the 12-engineer platform organization behind the Data Security Platform and OpenTDF — airgapped and as distributed SaaS.',
       'Led platform readiness for the first major customer release, anchoring delivery for a $17M client against a ~$42M ARR base.',
       'Established OIDC as the platform’s universal identity layer; DPoP and token-exchange flows for cross-platform handoffs.',
       'Delivered the full key-management modality matrix: Vault-style managed keys, AWS KMS, GCP KMS, and HSM root-key custody.',
       'Drove the strategic case for SaaS dogfooding, securing a dedicated business unit; authored the org’s AI development policy.'],
-    story: 'Director of Platform. The widest ridge on the chart: identity, crypto, SaaS, strategy — with honest gaps between peaks where frontend used to be.',
+    story: 'Director of Platform, then Sr Director (Dec 2025), then VP of Engineering, Platform (Aug 2026) — one ridge, because the work did not change shape at the title. The widest ridge on the chart: identity, crypto, SaaS, strategy — with honest gaps between peaks where frontend used to be.',
     use: { oidc: [1, 3], crypto: [0.9, 3], abac: [0.75, 2], tlspki: [0.6, 2], sdk: [0.7, 2], saas: [0.9, 3], strategy: [0.9, 2], orgdesign: [0.7, 2], productcollab: [0.6, 2], mentorship: [0.6, 1], hiring: [0.4, 1], aigov: [0.55, 2], cli: [0.45, 1], oss: [0.8, 2], eventdriven: [0.4, 1], observability: [0.3, 1], go: [0.45, 1], kubernetes: [0.3, 1] } },
   { id: 'homelab', kind: 'project', company: '', title: 'Homelab', start: 2008.4, end: 2026.65, color: '#b08b3f',
     story: 'The homelab runs under everything — the connective tissue between roles. Plateaus are settled periods; the shafts between them are the moves. Its on-prem plateau is the last one anywhere: 2014.',

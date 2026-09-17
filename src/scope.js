@@ -109,18 +109,21 @@ export function assemble(target, data) {
     const companyRoles = (rolesByCompany.get(company.key) ?? [])
       .sort((a, b) => a.sort_order - b.sort_order)
       .map((role) => {
-        const bullets = selectedByRole.get(role.id);
-        if (!bullets || bullets.length === 0) return null;
+        // A role with no bullets still renders: a promotion is real the day it
+        // happens, and writing the bullets for it comes later. Dropping it
+        // silently hid a title change behind the backlog, which is the one
+        // thing a résumé must not do.
+        const bullets = selectedByRole.get(role.id) ?? [];
         return {
           title: role.title,
           note: role.note ?? "",
           dateRange: formatDateRange(role.start, role.end),
           bullets: bullets.map((b) => b.bullet),
         };
-      })
-      .filter(Boolean);
+      });
 
-    if (companyRoles.length === 0) continue; // skip empty companies
+    // A company with no roles at all is still skipped.
+    if (companyRoles.length === 0) continue;
     experience.push({
       display: company.display,
       location: company.location ?? "",
