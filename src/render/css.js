@@ -81,8 +81,16 @@ h2.section-title {
 }
 ul { margin: 4px 0 0; padding-left: 18px; }
 li { margin: 3px 0; }
+/* Companies were separated only by the trailing margin of the last role's
+   <ul>, so a role with no bullets let the next company name collide with it.
+   The gap between two employers is structural and should not depend on whether
+   the last one happened to have bullets selected for this target. */
+.company + .company { margin-top: 13px; }
 .role { margin-top: 9px; }
 .role:first-child { margin-top: 4px; }
+/* And a bulletless role needs its own floor, or the next role's title sits on
+   top of it at the same 9px used between a bullet list and the next title. */
+.role:not(:has(ul)) { padding-bottom: 3px; }
 .company-line {
   display: flex;
   justify-content: space-between;
@@ -666,13 +674,27 @@ const RESUME_SCREEN = `
   .education-row .degree { color: #7b5f3f; }
 
   /* Print / save as PDF, and the way onward to the machine-readable copies. */
+  /* The actions sit top-right, level with the name. They share a row with the
+     name only: the headline and the contact line span the full measure, or the
+     contact wraps mid-list to make room for a 150px column. */
+  header.masthead {
+    display: grid;
+    grid-template-columns: 1fr auto;
+    column-gap: 28px;
+    align-items: start;
+  }
+  h1.name { grid-column: 1; grid-row: 1; }
+  .headline, .contact { grid-column: 1 / -1; }
   .resume-actions {
+    grid-column: 2;
+    grid-row: 1;
     display: flex;
-    flex-wrap: wrap;
-    gap: 18px;
-    margin: 22px 0 0;
-    padding-top: 12px;
-    border-top: 1px solid #cfc3a8;
+    flex-direction: column;
+    align-items: flex-end;
+    gap: 9px;
+    margin: 0;
+    padding-top: 10px;
+    white-space: nowrap;
     font-family: "IBM Plex Mono", ui-monospace, monospace;
     font-size: 11px;
     letter-spacing: .12em;
@@ -689,6 +711,19 @@ const RESUME_SCREEN = `
     text-underline-offset: 3px;
   }
   .resume-actions a:hover, .resume-actions button:hover { color: #b03b1e; }
+
+  @media (max-width: 720px) {
+    header.masthead { display: block; }
+    h1.name, .headline, .contact, .resume-actions { grid-column: auto; grid-row: auto; }
+    .resume-actions {
+      flex-direction: row;
+      align-items: baseline;
+      gap: 18px;
+      margin-top: 18px;
+      padding-top: 12px;
+      border-top: 1px solid #cfc3a8;
+    }
+  }
 }
 
 @media print {

@@ -16,8 +16,10 @@ export const NAV = [
   { href: "/blog", label: "Blog", key: "blog" },
   { href: "/talks", label: "Talks", key: "talks" },
   { href: "/resume", label: "Résumé", key: "resume" },
-  { href: "/resume.txt", label: "Plain text", key: "text" },
 ];
+// /resume.txt is deliberately not here. It is one of several renderings of the
+// résumé (.txt, .md, print), and they belong with the document rather than in a
+// nav that every page carries — /resume offers them in its masthead.
 
 // The machine-readable map of the site (llmstxt.org). It is the same file on
 // every page, which is the point: whichever page a crawler lands on, the way

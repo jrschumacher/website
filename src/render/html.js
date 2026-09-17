@@ -1,7 +1,9 @@
 // Résumé HTML renderer — server-rendered from the assembled structure.
-// Ported from jrschumacher/resume (src/render/html.js). The markup is unchanged;
-// the only edit is that the document shell now comes from layout.js so the
-// résumé and the blog share one <head> and one nav.
+// Ported from jrschumacher/resume (src/render/html.js). Two edits to the ported
+// markup: the document shell now comes from layout.js so the résumé and the
+// blog share one <head> and one nav, and the masthead carries the actions block
+// (screen puts it top-right by grid placement). Print is untouched: the actions
+// are display:none there and the masthead is the centred stack it always was.
 
 import { escapeHtml } from "../format.js";
 import { layout } from "./layout.js";
@@ -113,6 +115,11 @@ function educationSection(education) {
  * also the only way to get a PDF that is not styled like the rest of the site,
  * which is the point — this one is read by recruiters and parsers.
  */
+/**
+ * The other renderings of this document: the printed one, and the plain-text
+ * one. They sit in the masthead rather than in the site nav, because they are
+ * this page's business and no other page's.
+ */
 function actions() {
   return `<div class="resume-actions">
     <button type="button" onclick="window.print()">print / save as pdf</button>
@@ -124,11 +131,11 @@ function actions() {
 export function resumeBody(resume) {
   return `<header class="masthead">
     <h1 class="name">${e(resume.name)}</h1>
+    ${actions()}
     ${resume.headline ? `<div class="headline">${e(resume.headline)}</div>` : ""}
     <div class="contact">${contactLine(resume.contact)}</div>
   </header>
   ${resume.summary ? `<p class="summary">${e(resume.summary)}</p>` : ""}
-  ${actions()}
   ${highlightsSection(resume.highlights)}
   ${experienceSection(resume.experience)}
   ${skillsSection(resume.skills)}
