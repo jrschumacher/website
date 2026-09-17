@@ -140,6 +140,8 @@ export function renderHtml(resume) {
     description: resume.headline || undefined,
     current: "resume",
     stylesheet: RESUME_STYLESHEET,
+    // The same résumé, for anything that would rather parse than render.
+    head: `<link rel="alternate" type="text/markdown" href="/resume.md" title="Résumé (Markdown)">`,
     body: resumeBody(resume),
   });
 }

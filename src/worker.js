@@ -8,10 +8,11 @@
 // Worker has no binding to and therefore cannot reach.
 
 import { handleHome } from "./routes/home.js";
-import { handleResumeHtml, handleResumeText } from "./routes/resume.js";
+import { handleResumeHtml, handleResumeText, handleResumeMarkdown } from "./routes/resume.js";
 import { handleBlogIndex, handleBlogPost } from "./routes/blog.js";
 import { handleTalksIndex, handleTalk, handlePatternSvg } from "./routes/talks.js";
 import { handleWorkIndex, handleWork } from "./routes/work.js";
+import { handleLlmsTxt } from "./routes/llms.js";
 import { layout } from "./render/layout.js";
 
 function plain(body, status) {
@@ -69,8 +70,12 @@ export default {
         response = await handleHome(request, env);
       } else if (path === "/resume") {
         response = await handleResumeHtml(request, env);
+      } else if (path === "/resume.md") {
+        response = await handleResumeMarkdown(request, env);
       } else if (path === "/resume.txt") {
         response = await handleResumeText(request, env);
+      } else if (path === "/llms.txt") {
+        response = await handleLlmsTxt(request, env);
       } else if (path === "/work") {
         response = await handleWorkIndex(request, env);
       } else if (path.startsWith("/work/")) {

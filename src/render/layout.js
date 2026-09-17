@@ -19,6 +19,11 @@ export const NAV = [
   { href: "/resume.txt", label: "Plain text", key: "text" },
 ];
 
+// The machine-readable map of the site (llmstxt.org). It is the same file on
+// every page, which is the point: whichever page a crawler lands on, the way
+// to the rest of the site in one fetch is one link away.
+const LLMS = `<link rel="alternate" type="text/plain" href="/llms.txt" title="llms.txt">`;
+
 const FONTS = `<link rel="preconnect" href="https://fonts.googleapis.com">
 <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin="anonymous">
 <link href="https://fonts.googleapis.com/css2?family=EB+Garamond:ital,wght@0,400;0,500;0,600;1,400&amp;family=IBM+Plex+Mono:wght@400;500&amp;display=swap" rel="stylesheet">`;
@@ -62,6 +67,7 @@ export function layout({ title, description, current, stylesheet, fonts = true, 
 <title>${e(title)}</title>
 ${desc}
 ${fonts ? FONTS : ""}
+${LLMS}
 <style>${stylesheet ?? SITE_STYLESHEET}</style>
 ${head ?? ""}
 </head>
