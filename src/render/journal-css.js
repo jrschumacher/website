@@ -93,7 +93,20 @@ a:hover { color: var(--accent); }
   line-height: 1.1;
 }
 .masthead-sub { margin: 8px 0 0; font-size: 18px; font-style: italic; color: var(--body-soft); }
+.masthead-right { display: flex; flex-direction: column; align-items: flex-end; gap: 8px; }
 .masthead-slug { font-size: 11px; letter-spacing: .14em; color: var(--muted); text-align: right; }
+.masthead-nav {
+  display: flex;
+  flex-wrap: wrap;
+  justify-content: flex-end;
+  gap: 16px;
+  font-size: 11px;
+  letter-spacing: .14em;
+}
+.masthead-nav a { color: var(--muted); text-decoration: none; }
+.masthead-nav a:hover { color: var(--accent); }
+/* The record is where you already are; it reads as a label, not a link. */
+.masthead-here { color: var(--ink); }
 
 .site-grid {
   display: grid;
@@ -613,7 +626,9 @@ a.note-title:hover { color: var(--accent); }
   :root { --gutter: 20px; }
   .plate { padding: 32px var(--gutter) 48px; }
   .sheet { padding: var(--gutter) var(--gutter) 48px; }
+  .masthead-right { align-items: flex-start; }
   .masthead-slug { text-align: left; }
+  .masthead-nav { justify-content: flex-start; gap: 12px; }
   .about-body { gap: 24px; }
   .portrait-frame { transform: none; }
   .portrait-slot, .portrait-img { width: 100%; max-width: 232px; }

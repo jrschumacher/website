@@ -10,7 +10,7 @@ import { SITE_STYLESHEET } from "./css.js";
 
 const e = escapeHtml;
 
-const NAV = [
+export const NAV = [
   { href: "/", label: "The record", key: "home" },
   { href: "/blog", label: "Blog", key: "blog" },
   { href: "/talks", label: "Talks", key: "talks" },

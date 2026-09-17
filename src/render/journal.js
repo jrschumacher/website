@@ -9,6 +9,7 @@
 import { escapeHtml } from "../format.js";
 import { caseDiagram } from "./diagrams.js";
 import { JOURNAL_STYLESHEET, talkStackRules } from "./journal-css.js";
+import { NAV } from "./layout.js";
 import { sections, caseStudies, notes, contact } from "../../public/journal/data/site.js";
 import { rangeFigure, rangeAside, rangeScaleNote } from "../../public/journal/figures/range.js";
 import {
@@ -40,6 +41,22 @@ function sectionHead(num, label, slug) {
 <div class="sec-title">${e(num)} — ${e(label)}</div>
 <div class="sec-slug mono">${e(slug)}</div>
 </div>`;
+}
+
+/**
+ * The site nav, in the masthead.
+ *
+ * Every other page carries it in `.sitenav`; the homepage had nothing, so the
+ * only way off it was the colophon. Same list as layout.js, imported rather
+ * than retyped — a nav that disagrees with itself is worse than no nav.
+ */
+function mastheadNav() {
+  const items = NAV.map((item) =>
+    item.key === "home"
+      ? `<span class="masthead-here">${e(item.label.toLowerCase())}</span>`
+      : `<a href="${e(item.href)}">${e(item.label.toLowerCase())}</a>`,
+  ).join("");
+  return `<nav class="masthead-nav mono" aria-label="Site">${items}</nav>`;
 }
 
 function index() {
@@ -75,7 +92,7 @@ ${portrait(portraitSrc)}
 <div class="about-prose">
 <h2>Ryan Schumacher — principal engineer in data-centric security &amp; identity.</h2>
 <p>I build the platforms underneath data security: identity federation (OIDC, DPoP, token exchange), enterprise key management (HSM, KMS, KAS), and policy-driven access control on open-source foundations. Currently Director of Platform at Virtru, leading the engineering organization behind the Data Security Platform and OpenTDF — software that runs air-gapped and as distributed SaaS. Before that: engineering manager, staff engineer, bank lead, and co-founder of three ventures over nine years.</p>
-<p>Twenty-three years of work resist a bulleted list, so this site keeps the record as figures — the same experience in different presentations. Read <a href="#growth">the growth</a> to watch it accumulate era by era, or <a href="#figures">the figures</a> for the ranges and streams it settles into. The boring version is <a href="/resume.txt">/resume.txt</a>.</p>
+<p>Twenty-three years of work resist a bulleted list, so this site keeps the record as figures — the same experience in different presentations. Read <a href="#growth">the growth</a> to watch it accumulate era by era, or <a href="#figures">the figures</a> for the ranges and streams it settles into. The boring version is <a href="/resume">/resume</a>.</p>
 <div class="about-facts">
 <div class="fact">${e(now)}</div>
 <div class="fact">field — identity · keys · policy · platforms · open source</div>
@@ -302,7 +319,8 @@ ${sectionHead("VII", "contact", "get in touch")}
 function colophon() {
   return `<footer class="colophon mono">
 <p>colophon — set in eb garamond &amp; ibm plex mono · figures drawn from the record</p>
-<p><a href="mailto:j.r.schumacher@gmail.com">email</a> · <a href="https://github.com/jrschumacher">github</a> · <a href="https://linkedin.com/in/jrschumacher">linkedin</a> · <a href="/resume.txt">/resume.txt</a> · <a href="/blog">blog</a></p>
+<p><a href="mailto:j.r.schumacher@gmail.com">email</a> · <a href="https://github.com/jrschumacher">github</a> · <a href="https://linkedin.com/in/jrschumacher">linkedin</a></p>
+<p><a href="/blog">blog</a> · <a href="/talks">talks</a> · <a href="/resume">résumé</a> · <a href="/resume.txt">plain text</a></p>
 <p>© 2026 ryan schumacher · field notes from the record</p>
 </footer>`;
 }
@@ -342,7 +360,10 @@ export function renderJournal({
 <h1>aboldnewlook</h1>
 <p class="masthead-sub">the field record of Ryan Schumacher — identity, keys, and the platforms underneath</p>
 </div>
+<div class="masthead-right">
 <div class="masthead-slug mono">FIELD NOTES · 2003–2026</div>
+${mastheadNav()}
+</div>
 </header>
 <div class="site-grid" data-site-grid>
 ${index()}
