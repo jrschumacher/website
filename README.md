@@ -97,16 +97,21 @@ Two D1 bindings, both read-only from this Worker:
   that the private [resume Worker](https://github.com/jrschumacher/resume)
   uses. That database also holds job-hunt data; the split exists so this Worker
   has no binding that could reach it.
-  `db/0001_seed_public_resume.sql` is the one-time copy that seeded it, and
-  `bin/publish-resume` is how it is refreshed since. Nothing refreshes it
-  automatically: the private Worker has no binding to this database and never
-  had one, so between the split and that script the two diverged silently —
-  every bullet written on the private side went somewhere this site cannot
-  read. Publishing is a disclosure decision, so it stays a thing a human runs
-  after reading the diff. The script never copies `accomplishments.notes` or
-  `roles.note` (working commentary on one side, rendered copy on the other),
-  skips bullets tagged `private`, and publishes only allowlisted targets — a
-  target names the job being applied for.
+  `db/0001_seed_public_resume.sql` is the one-time copy that seeded it. It is
+  refreshed hourly by a cron in the private [resume
+  Worker](https://github.com/jrschumacher/resume) (`src/publish.js`), which is
+  the only thing that writes here. For months nothing did: that Worker had no
+  binding to this database, so the two diverged in silence and every bullet
+  written after the split went somewhere this site could not read.
+
+  The direction is deliberate and one-way. The private Worker reaches in here;
+  this Worker has no binding that could reach the backlog, which is the whole
+  point of the split. Do not add one.
+
+  A bullet appears here only if it is tagged `public` in the backlog — untagged
+  means unpublished, so a missed tag leaves the page stale rather than leaking.
+  Neither notes column is ever copied, and `roles.note` on this side is curated
+  by hand and survives a publish.
 
 - **`BLOG` → `personal-blog`** (`2aec93a1-cc30-4480-b3e7-31611f15f2bf`)
   The published shelf, written by a Cairn publish step. A post is visible here

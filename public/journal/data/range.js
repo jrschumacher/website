@@ -10,9 +10,14 @@
 // maps below, which are what actually draws the peaks. Wiring the figures to
 // real data means a skills-per-role table first.
 //
-// Divergence from the handoff bundle: the vr-dir ridge's title and story were
-// updated for the Jan 2026 and Aug 2026 promotions, and the auburn ridge was
-// corrected to the real role. Every other number is the handoff's.
+// Divergence from the handoff bundle: every role ridge from 2003 to 2019 has
+// been rebuilt from the record — three résumés (2007, ~2015, current), the
+// LinkedIn history and Ryan directly — and the vr-dir ridge relabelled for the
+// Jan 2026 and Aug 2026 promotions. The handoff's invented ridges are gone: a
+// university job at Temple that never happened, and a web-agency-then-startup-
+// then-consultancy decade that was really one company with two spin-offs. The
+// skill columns, the geometry and the Virtru-era numbers are still the
+// handoff's.
 export const fams = [
   { id: 'sys',  name: 'systems & ops' },
   { id: 'lang', name: 'languages' },
@@ -70,6 +75,23 @@ export const skills = [
   { id: 'aigov', name: 'ai governance', fam: 'lead' }
 ];
 export const ridges = [
+  // Perfect Worldwide Network Host, Nov 2003 – Dec 2004. From the Jun 2007
+  // résumé; it is on no other record, LinkedIn included.
+  { id: 'pwnh', kind: 'role', company: 'Perfect Worldwide Network Host', title: 'Co-Owner', label: 'perfect worldwide · co-owner', start: 2003.85, end: 2004.95, color: '#6b7f6a',
+    record: ['Co-owned a web host as an undergraduate — sales plans, finances, and the meetings.',
+      'Ran the server and the customer and staff accounts; troubleshot whatever broke.',
+      'Built the sites too: PHP, MySQL, and the graphics.'],
+    story: 'A web host, co-owned at nineteen. The first time the whole stack and the whole business were the same job — sales in the morning, PHP and a MySQL schema in the afternoon.',
+    use: { php: [0.9, 2], mysql: [0.8, 2], htmlcss: [0.9, 2], linux: [0.7, 2], onprem: [0.6, 2], strategy: [0.5, 1] } },
+  // Freelance. Started Aug 2000 per the 2015-era résumé, which is earlier than
+  // this chart begins — the ridge is clipped to the 2003 floor, and the record
+  // says so rather than pretending the work started with the axis.
+  { id: 'freelance', kind: 'role', company: 'Freelance', title: 'Freelancer', label: 'freelance', start: 2003.0, end: 2009.1, color: '#7d6b4f',
+    record: ['Freelance from Aug 2000 — consulting, site and logo design, small applications — run alongside the university job and the degree.',
+      'Joined existing projects, refactored others outright, across languages and time zones.',
+      'Published a handful of open-source projects and contributed to close to a hundred more.'],
+    story: 'Freelance, from before this chart starts. Consulting and small builds alongside the university job and the degree, and the beginning of a long open-source habit — the ridge is clipped at 2003 because the axis is, not because the work was.',
+    use: { htmlcss: [0.5, 2], php: [0.45, 2], oss: [0.4, 2], mysql: [0.3, 1], linux: [0.25, 1] } },
   // Real, from the résumé: Information Technology Specialist III, Auburn
   // University, Feb 2005 – Feb 2009. The handoff had this as 'Student sysadmin'
   // 2003.6–2007.5, which was neither the title nor the span.
@@ -78,22 +100,42 @@ export const ridges = [
       'Operating systems, Oracle servers, and enterprise hardware — maintained and tuned.',
       'Wrote the monitoring and security-compliance scripts, and kept the patch cadence that closed the vulnerabilities.'],
     story: 'Head Linux sysadmin at Auburn, run alongside the CS degree. Everything was on the machine in front of you: the servers, the Oracle boxes, the scripts that watched them.',
-    use: { linux: [1, 3], bash: [1, 2], perl: [0.92, 3], networking: [0.7, 2], onprem: [1, 3], mysql: [0.5, 1], php: [0.6, 2], htmlcss: [0.5, 1], c: [0.35, 1], python: [0.2, 1] } },
-  { id: 'v1', kind: 'role', company: 'Ventures', title: 'Co-founder · web agency', start: 2009.1, end: 2012.3, color: '#b3703a',
-    record: ['First of three ventures founded over nine years, spanning B2B SaaS and consumer products.',
-      'Shipped LAMP sites end to end — sales call to deploy — for anyone who would pay.'],
-    story: 'Web agency years. Shipping LAMP sites for anyone who would pay. The founder skills — strategy, hiring — start here as faint washes.',
-    use: { php: [0.9, 3], mysql: [0.85, 2], htmlcss: [0.95, 2], jquery: [0.85, 2], linux: [0.55, 1], rest: [0.4, 1], strategy: [0.5, 1], hiring: [0.3, 1], productcollab: [0.45, 1] } },
-  { id: 'v2', kind: 'role', company: 'Ventures', title: 'Co-founder / CTO · product', start: 2012.3, end: 2015.0, color: '#a04b28',
-    record: ['First real product ownership: Rails, Postgres, and a paying B2B customer base.',
-      'Exited the datacenter in 2014 — the move that ended on-prem work for a decade.'],
-    story: 'Product startup. First real product ownership — Rails, Postgres, and the datacenter exit in 2014 that ended on-prem work for a decade.',
-    use: { ruby: [0.9, 3], postgres: [0.85, 2], rest: [0.8, 2], nodejs: [0.45, 1], angular: [0.6, 2], cicd: [0.5, 1], onprem: [0.6, 2], strategy: [0.7, 2], productcollab: [0.7, 2], hiring: [0.5, 1], htmlcss: [0.55, 1], jquery: [0.3, 1], mysql: [0.3, 1] } },
-  { id: 'v3', kind: 'role', company: 'Ventures', title: 'Eng lead · consultancy', start: 2015.0, end: 2017.2, color: '#8a5a33',
-    record: ['Node and early React across a rotation of client codebases.',
-      'Mentorship became a deliberate practice instead of an accident of seniority.'],
-    story: 'Consultancy. Node and early React across client codebases; mentorship becomes a deliberate practice instead of an accident.',
-    use: { nodejs: [0.85, 2], react: [0.7, 2], rest: [0.7, 1], postgres: [0.5, 1], docker: [0.6, 2], cicd: [0.6, 1], mentorship: [0.5, 1], productcollab: [0.6, 1], typescript: [0.35, 1], angular: [0.3, 1] } },
+    use: { linux: [1, 3], bash: [1, 2], perl: [0.92, 3], networking: [0.7, 2], onprem: [1, 3], mysql: [0.6, 2], php: [0.5, 2], htmlcss: [0.4, 1], c: [0.3, 1] } },
+  // The ventures, as they actually were. The handoff had this decade as three
+  // sequential ridges — a web agency, then a product startup, then a
+  // consultancy — which is not what happened. 38pages / tep.io ran the whole
+  // ten years and Outfit Outdoors and Hatch Safety were spun out of it, so
+  // these overlap rather than follow one another. Skill maps are read off the
+  // résumé bullets and the skill chips on each role, not invented.
+  { id: 'tepio', kind: 'role', company: '38pages / tep.io', title: 'Co-Founder / Partner / CTO', label: 'tep.io · co-founder / cto', start: 2009.1, end: 2019.5, color: '#b3703a',
+    record: ['Co-founded tep.io; drove technical vision and product development as CTO for a decade.',
+      'Built a comprehensive ERM solution for a major fitness franchise — CRM, POS and scheduling in one.',
+      'Turnkey migrations for educational institutions, and the agile practice that made them repeatable.',
+      'Spun off Outfit Outdoors and Hatch Safety, staying partner and CTO of the parent through both.'],
+    story: 'The long one. Ten years of client and product work under one roof, PHP and MySQL at the start, Node by the end — and the parent company that Outfit Outdoors and Hatch Safety were spun out of.',
+    // Fractions are deliberately conservative. Peak height is fraction x span,
+    // so on a ten-year ridge every tenth of a point is a year of drawn height —
+    // the same 0.8 that reads as "most of it" on a two-year role would tower
+    // over the whole chart here. Nothing was used continuously for a decade.
+    use: { php: [0.4, 3], mysql: [0.45, 2], htmlcss: [0.4, 2], nodejs: [0.4, 2], rest: [0.35, 2], jquery: [0.25, 2], linux: [0.3, 1], angular: [0.2, 1], strategy: [0.55, 2], productcollab: [0.45, 2], hiring: [0.3, 1], mentorship: [0.3, 1] } },
+  { id: 'bhamvoice', kind: 'role', company: 'The Birmingham Voice', title: 'Co-founder / Director of Operations', label: 'the birmingham voice · ops', start: 2011.1, end: 2013.9, color: '#8a5a33',
+    record: ['Co-founded a street paper — NASNA member — to give the voiceless a byline and the unemployed a job.',
+      'Built the in-house software that managed vendors and contributors.',
+      'Trained and ran a workforce of more than twenty vendors.'],
+    story: 'The one that was not a software job. Running a street paper taught operations and people at a scale no engineering role had yet — and still needed software, so it got built.',
+    use: { nodejs: [0.7, 2], htmlcss: [0.5, 1], mysql: [0.4, 1], orgdesign: [0.6, 2], hiring: [0.5, 2], strategy: [0.5, 1], productcollab: [0.4, 1] } },
+  { id: 'outfit', kind: 'role', company: 'Outfit Outdoors', title: 'Co-Founder / CTO', label: 'outfit outdoors · cto', start: 2014.9, end: 2016.5, color: '#a04b28',
+    record: ['Co-founded a real-time social network and led its design and architecture as CTO.',
+      'Shipped a monolith first, then refactored to microservices once the shape was known.',
+      'Grew it to 1,000 daily and 15,000 total users with a team of three.'],
+    story: 'Spun out of tep.io. A real-time social network: monolith first, microservices once it was earned — the same instinct that later refolded a service fleet back into one binary.',
+    use: { nodejs: [0.95, 3], rest: [0.8, 2], htmlcss: [0.5, 1], angular: [0.4, 1], mysql: [0.4, 1], eventdriven: [0.35, 1], strategy: [0.6, 2], hiring: [0.4, 1], productcollab: [0.5, 1], mentorship: [0.4, 1] } },
+  { id: 'hatch', kind: 'role', company: 'Hatch Safety Inc', title: 'Co-Founder / CTO', label: 'hatch safety · cto', start: 2016.0, end: 2019.5, color: '#9c6b2f',
+    record: ['Co-founded an enterprise safety platform built around OSHA and MSHA compliance.',
+      'Led product development with business analysts, turning client need into workable use cases.',
+      'Shipped predictive features that measurably cut organisational safety costs.'],
+    story: 'Also spun out of tep.io, and the first time compliance was the product rather than a constraint on it — a decade before FedRAMP and air-gapped deployment became the day job.',
+    use: { nodejs: [0.85, 2], angular: [0.8, 2], rest: [0.6, 2], mysql: [0.5, 1], htmlcss: [0.4, 1], productcollab: [0.8, 2], strategy: [0.6, 2] } },
   { id: 'bbva', kind: 'role', company: 'BBVA USA', title: 'Lead engineer', start: 2017.2, end: 2019.45, color: '#46628c',
     record: ['Led a team supporting 5,000+ daily active users.',
       'Migrated a legacy application to microfrontends, increasing team velocity by 75%.'],
@@ -162,7 +204,6 @@ export const ridges = [
 export const events = [
   { skill: 'perl', year: 2005.5, ridge: 'auburn', label: 'Campus job scheduler in Perl', impact: 1, note: 'Heavily used at Auburn — untouched since 2009.' },
   { skill: 'onprem', year: 2008.8, ridge: 'auburn', label: 'University rack build-out', impact: 2 },
-  { skill: 'onprem', year: 2014.0, ridge: 'v2', label: 'Datacenter exit', impact: 2, note: 'The last on-prem touch point. Dormant since 2014.' },
   { skill: 'microfrontends', year: 2018.3, ridge: 'bbva', label: 'Microfrontends at BBVA', impact: 3 },
   { skill: 'react', year: 2020.85, ridge: 'vr-senior', label: 'Policy web app · $250k', impact: 2 },
   { skill: 'fedramp', year: 2022.4, ridge: 'vr-em', label: 'FedRAMP greenfield', impact: 3 },
