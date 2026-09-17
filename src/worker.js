@@ -1,4 +1,4 @@
-// aboldnewlook.com — one Worker, two D1 bindings, no build step, no client JS.
+// aboldnewlook.com — one Worker, two D1 bindings, no build step.
 //
 //   RESUME -> resume-public   (profile, companies, roles, accomplishments, targets)
 //   BLOG   -> personal-blog   (posts, revisions, tags, post_tags, source_ideas)
@@ -7,8 +7,12 @@
 // design: the private job-pipeline data lives in a different database that this
 // Worker has no binding to and therefore cannot reach.
 
-import { handleResumeHtml, handleResumeText } from "./routes/resume.js";
+import { handleHome } from "./routes/home.js";
+import { handleResumeHtml, handleResumeText, handleResumeMarkdown } from "./routes/resume.js";
 import { handleBlogIndex, handleBlogPost } from "./routes/blog.js";
+import { handleTalksIndex, handleTalk, handlePatternSvg } from "./routes/talks.js";
+import { handleWorkIndex, handleWork } from "./routes/work.js";
+import { handleLlmsTxt } from "./routes/llms.js";
 import { layout } from "./render/layout.js";
 
 function plain(body, status) {
@@ -24,7 +28,7 @@ function notFound() {
       title: "Not found — Ryan Schumacher",
       body: `<h1 class="page-title">Not found</h1>
 <p class="page-lede">There is nothing at this address.</p>
-<div class="empty"><p><a href="/">Résumé</a> · <a href="/blog">Blog</a></p></div>`,
+<div class="empty"><p><a href="/">The record</a> · <a href="/work">Case studies</a> · <a href="/blog">Blog</a> · <a href="/talks">Talks</a> · <a href="/resume">Résumé</a></p></div>`,
     }),
     { status: 404, headers: { "content-type": "text/html; charset=utf-8" } },
   );
@@ -49,19 +53,46 @@ export default {
       });
     }
 
-    const path = normalize(new URL(request.url).pathname);
+    const url = new URL(request.url);
+
+    // One canonical address. www is served only so it does not fail, and it
+    // redirects rather than duplicating every page at a second URL.
+    if (url.hostname === "www.aboldnewlook.com") {
+      url.hostname = "aboldnewlook.com";
+      return Response.redirect(url.toString(), 301);
+    }
+
+    const path = normalize(url.pathname);
 
     try {
       let response;
       if (path === "/") {
+        response = await handleHome(request, env);
+      } else if (path === "/resume") {
         response = await handleResumeHtml(request, env);
+      } else if (path === "/resume.md") {
+        response = await handleResumeMarkdown(request, env);
       } else if (path === "/resume.txt") {
         response = await handleResumeText(request, env);
+      } else if (path === "/llms.txt") {
+        response = await handleLlmsTxt(request, env);
+      } else if (path === "/work") {
+        response = await handleWorkIndex(request, env);
+      } else if (path.startsWith("/work/")) {
+        const slug = decodeURIComponent(path.slice("/work/".length));
+        response = slug ? await handleWork(request, env, slug) : null;
       } else if (path === "/blog") {
         response = await handleBlogIndex(request, env);
       } else if (path.startsWith("/blog/")) {
         const slug = decodeURIComponent(path.slice("/blog/".length));
         response = slug ? await handleBlogPost(request, env, slug) : null;
+      } else if (path === "/talks") {
+        response = await handleTalksIndex(request, env);
+      } else if (path.startsWith("/talks/")) {
+        const slug = decodeURIComponent(path.slice("/talks/".length));
+        response = slug ? await handleTalk(request, env, slug) : null;
+      } else if (path === "/deck/pattern.svg") {
+        response = await handlePatternSvg(request, env);
       }
 
       if (!response) response = notFound();

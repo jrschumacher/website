@@ -1,8 +1,8 @@
 {
   "name": "aboldnewlook-website",
-  "version": "1.0.0",
+  "version": "1.1.0",
   "private": true,
-  "description": "aboldnewlook.com — résumé homepage + blog, one Cloudflare Worker, no build step",
+  "description": "aboldnewlook.com — the field record, a blog, and the résumé, one Cloudflare Worker, no build step",
   "type": "module",
   "scripts": {
     "dev": "wrangler dev",

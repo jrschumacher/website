@@ -1,0 +1,26 @@
+# The Cloudflare build was the only check on this repo, and a build is not a
+# test: a registry importing three decks that were never committed looked
+# healthy for two weeks because nothing ran `npm test` on push.
+name: test
+
+# push on the default branch, pull_request everywhere else. `push: "**"` plus
+# `pull_request` ran this twice on every commit to an open PR — same commit,
+# same result, twice the queue.
+on:
+  push:
+    branches: [main]
+  pull_request:
+
+jobs:
+  test:
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+      - uses: actions/setup-node@v4
+        with:
+          node-version: "22"
+      - run: npm install --no-audit --no-fund
+      - run: npm test
+      # The bundle is the other half: `npm test` cannot see an import that only
+      # the Workers bundler resolves, which is exactly how those decks hid.
+      - run: npx wrangler deploy --dry-run --outdir /tmp/dry
