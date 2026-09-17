@@ -40,10 +40,16 @@ function nav(current) {
  *                                   is set in the résumé's own print families)
  * @param {string} [opts.head]       extra markup for <head>; the deck pages use
  *                                   it to add their own stylesheet
+ * @param {boolean} [opts.wide]      widen the shell past the 760px reading
+ *                                   column, for pages that lay cards out side
+ *                                   by side rather than set prose (/talks).
+ *                                   The class goes on <body> because the nav
+ *                                   rule and the footer rule have to grow with
+ *                                   the content or they stop lining up.
  * @param {string} opts.body         markup for the <main class="page"> element
  * @param {string} [opts.head]       extra markup for <head> (stylesheets, font links)
  */
-export function layout({ title, description, current, stylesheet, fonts = true, head, body }) {
+export function layout({ title, description, current, stylesheet, fonts = true, head, wide = false, body }) {
   const desc = description
     ? `<meta name="description" content="${e(description)}">`
     : "";
@@ -58,7 +64,7 @@ ${fonts ? FONTS : ""}
 <style>${stylesheet ?? SITE_STYLESHEET}</style>
 ${head ?? ""}
 </head>
-<body>
+<body${wide ? ' class="wide"' : ""}>
 ${nav(current)}
 <main class="page">
 ${body}

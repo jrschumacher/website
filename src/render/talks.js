@@ -21,6 +21,7 @@
 
 import { escapeHtml, formatDate, isoDate } from "../format.js";
 import { layout } from "./layout.js";
+import { TALKS_STYLESHEET } from "./css.js";
 import { DECK_CSS } from "./deck-css.js";
 
 const e = escapeHtml;
@@ -28,37 +29,60 @@ const e = escapeHtml;
 // --- /talks -------------------------------------------------------------------
 
 /**
- * The deck index. Order is the caller's: registry.listDecks() already sorts
- * newest first, and re-sorting here would put the ordering rule in two places.
+ * The deck index: a light table, every deck laid out flat as a transparency.
+ *
+ * Order is the caller's — registry.listDecks() already sorts newest first, and
+ * re-sorting here would put the ordering rule in two places. The position
+ * printed on each card ("TRANSPARENCY 02 / 05") is therefore that order, which
+ * is the point: it is a shelf with a top and a bottom, not a bag.
+ *
+ * Nothing here requires a deck to declare a date or a venue. Those lines appear
+ * when the frontmatter has them and the card closes up when it does not, so a
+ * deck is publishable the moment it is written.
  *
  * @param {{ slug: string, meta: object }[]} decks
  */
 export function renderTalksIndex(decks) {
-  const body = decks.length ? deckList(decks) : emptyState();
+  const body = decks.length ? deckSheet(decks) : emptyState();
   return layout({
     title: "Talks — Ryan Schumacher",
     description: "Talks and slide decks by Ryan Schumacher.",
     current: "talks",
+    stylesheet: TALKS_STYLESHEET,
+    wide: true,
     body: `<h1 class="page-title">Talks</h1>
 <p class="page-lede">Decks I have given, written as pages first. Each one reads top to bottom; press the arrow keys to fly it instead.</p>
 ${body}`,
   });
 }
 
-function deckList(decks) {
-  const items = decks
-    .map(({ slug, meta }) => {
-      const meta_ = [dateLine(meta.date), venueLine(meta.venue)]
-        .filter(Boolean)
-        .join(" · ");
-      return `<li>
-      <h2 class="post-title"><a href="/talks/${encodeURIComponent(slug)}">${e(meta.title)}</a></h2>
-      ${meta_ ? `<p class="post-meta">${meta_}</p>` : ""}
-      ${meta.summary ? `<p class="post-summary">${e(meta.summary)}</p>` : ""}
-    </li>`;
-    })
-    .join("");
-  return `<ul class="postlist">${items}</ul>`;
+function deckSheet(decks) {
+  const n = decks.length;
+  const items = decks.map((deck, i) => sheetCard(deck, i, n)).join("\n");
+  return `<ul class="sheet">${items}</ul>`;
+}
+
+function sheetCard({ slug, meta }, i, n) {
+  const position = `${pad(i + 1)} / ${pad(n)}`;
+  // The left slot is the date when the deck has one. "TALK" is what stands
+  // there until it does — a label rather than an empty half of a rule.
+  const stamp = dateLine(meta.date) || "TALK";
+  return `<li>
+  <a class="sheet-card" href="/talks/${encodeURIComponent(slug)}">
+    <span class="tape" aria-hidden="true"></span>
+    <span class="sheet-meta"><span>${stamp}</span><span>TRANSPARENCY ${position}</span></span>
+    <h2 class="sheet-title">${e(meta.title)}</h2>
+    <span class="sheet-rule" aria-hidden="true"></span>
+    ${meta.venue ? `<span class="sheet-venue">${e(meta.venue)}</span>` : ""}
+    ${meta.summary ? `<span class="sheet-summary">${e(meta.summary)}</span>` : ""}
+    <span class="sheet-foot"><span>${e(slug)}</span><span>read the deck →</span></span>
+  </a>
+</li>`;
+}
+
+/** Two digits, so the positions line up in a monospaced column. */
+function pad(n) {
+  return String(n).padStart(2, "0");
 }
 
 /** A <time> when the date is a real YYYY-MM-DD, the raw string otherwise. */
@@ -104,19 +128,24 @@ export function renderDeckPage(deck) {
     .filter(Boolean)
     .join("\n");
 
-  const sub = [dateLine(meta.date), venueLine(meta.venue)].filter(Boolean).join(" · ");
+  const stamp = [dateLine(meta.date), venueLine(meta.venue)]
+    .filter(Boolean)
+    .join(" · ");
 
   return layout({
     title: `${meta.title} — Ryan Schumacher`,
     description: meta.summary || undefined,
     current: "talks",
+    stylesheet: TALKS_STYLESHEET,
     head,
-    // A deck brings its own typography in `head`; the site's fonts would be a
-    // second stylesheet link the deck never asked for.
-    fonts: false,
+    // The deck theme in `head` sets its own families and wins inside .deck. The
+    // site fonts are still needed: the nav, the footer and this intro are the
+    // journal, and without them they render in a fallback serif on the one page
+    // of the site that does not match the rest of it.
     body: `<header class="deck-intro">
+  <p class="deck-kicker"><span>TALK${stamp ? " · " : ""}${stamp}</span><a href="/talks">← all talks</a></p>
   <h1 class="page-title">${e(meta.title)}</h1>
-  ${sub ? `<p class="post-meta">${sub}</p>` : ""}
+  <span class="rule-short" aria-hidden="true"></span>
   ${meta.summary ? `<p class="page-lede">${e(meta.summary)}</p>` : ""}
 </header>
 ${renderDeck(slides)}

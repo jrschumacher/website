@@ -147,13 +147,16 @@ test("a theme cannot close its own <style> element", () => {
   assert.match(themed, /a\{\}<\\\/style>/);
 });
 
-test("fonts: nothing at all when the deck declares none", () => {
+test("fonts: a deck that declares none pulls no deck families", () => {
   const page = renderDeckPage(fixture());
-  assert.ok(!page.includes("fonts.googleapis.com"));
-  assert.ok(!page.includes("fonts.gstatic.com"));
+  // The site's own families are still requested: the nav, the footer and the
+  // deck intro are the journal, and they are set in it on every other page.
+  assert.match(page, /family=EB\+Garamond/);
+  // But nothing beyond that one sheet.
+  assert.equal((page.match(/fonts\.googleapis\.com\/css2/g) ?? []).length, 1);
 });
 
-test("fonts: two preconnects and exactly one stylesheet link", () => {
+test("fonts: a deck's families arrive in one stylesheet request, not one each", () => {
   const page = renderDeckPage(
     fixture({
       meta: {
@@ -164,11 +167,13 @@ test("fonts: two preconnects and exactly one stylesheet link", () => {
   );
   assert.match(page, /<link rel="preconnect" href="https:\/\/fonts\.googleapis\.com">/);
   assert.match(page, /<link rel="preconnect" href="https:\/\/fonts\.gstatic\.com" crossorigin>/);
-  assert.equal((page.match(/rel="stylesheet"/g) ?? []).length, 1);
   assert.match(
     page,
     /href="https:\/\/fonts\.googleapis\.com\/css2\?family=Space\+Grotesk:wght@400;500;700&amp;family=IBM\+Plex\+Mono:wght@400;500&amp;display=swap"/,
   );
+  // Two sheets total on a deck page that declares fonts: the site's and the
+  // deck's. Three would mean a family had been split into its own request.
+  assert.equal((page.match(/fonts\.googleapis\.com\/css2/g) ?? []).length, 2);
 });
 
 test("fonts: a family with characters outside the allowed set is URL-encoded", () => {
@@ -209,17 +214,45 @@ test("the index lists title, date, venue and summary in the order given", () => 
   ]);
 
   assert.ok(html.indexOf("Later talk") < html.indexOf("Earlier talk"), "caller order preserved");
-  assert.match(html, /<a href="\/talks\/later">Later talk<\/a>/);
+  assert.match(html, /<a class="sheet-card" href="\/talks\/later">/);
+  assert.match(html, /<h2 class="sheet-title">Later talk<\/h2>/);
   assert.match(html, /<time datetime="2026-09-12">12 Sep 2026<\/time>/);
-  assert.match(html, /<span class="venue">SomeConf<\/span>/);
-  assert.match(html, /<p class="post-summary">Newest\.<\/p>/);
+  assert.match(html, /<span class="sheet-venue">SomeConf<\/span>/);
+  assert.match(html, /<span class="sheet-summary">Newest\.<\/span>/);
   assert.match(html, /<a href="\/talks" aria-current="page">Talks<\/a>/);
+});
+
+test("the index numbers each card by its position on the shelf", () => {
+  const html = renderTalksIndex([
+    { slug: "a", meta: { title: "A", fonts: [] } },
+    { slug: "b", meta: { title: "B", fonts: [] } },
+    { slug: "c", meta: { title: "C", fonts: [] } },
+  ]);
+  assert.match(html, /TRANSPARENCY 01 \/ 03/);
+  assert.match(html, /TRANSPARENCY 03 \/ 03/);
+  assert.ok(!html.includes("TRANSPARENCY 04"), "no position past the end of the shelf");
+});
+
+test("the index closes up around a deck with no date, venue or summary", () => {
+  const html = renderTalksIndex([{ slug: "bare", meta: { title: "Bare", fonts: [] } }]);
+  assert.match(html, /<h2 class="sheet-title">Bare<\/h2>/);
+  assert.ok(!html.includes('class="sheet-venue"'), "no empty venue line");
+  assert.ok(!html.includes('class="sheet-summary"'), "no empty summary line");
+  assert.match(html, /<span>TALK<\/span>/, "a label stands where the date would be");
 });
 
 test("the index has an honest empty state", () => {
   const html = renderTalksIndex([]);
   assert.match(html, /No talks published yet\./);
-  assert.ok(!html.includes("<ul class=\"postlist\">"));
+  assert.ok(!html.includes('<ul class="sheet">'));
+});
+
+test("the deck page frames the deck in the journal, and links back to the shelf", () => {
+  const page = renderDeckPage(fixture());
+  assert.match(page, /<a href="\/talks">← all talks<\/a>/);
+  assert.match(page, /<header class="deck-intro">/);
+  // The frame is the journal; the deck inside it is not.
+  assert.ok(page.indexOf('class="deck-intro"') < page.indexOf('<article class="deck"'));
 });
 
 // --- speaker notes --------------------------------------------------------

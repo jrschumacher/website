@@ -1,6 +1,6 @@
 // The stylesheets for everything that is not the homepage.
 //
-// Two of them, because the two things want different paper:
+// Three of them, because the pages want different paper:
 //
 //   RESUME_STYLESHEET — the canonical résumé stylesheet ported from
 //     jrschumacher/resume (src/render/css.js), still unchanged in its résumé
@@ -9,6 +9,10 @@
 //   SITE_STYLESHEET — the blog and the 404, in the field-journal palette the
 //     homepage introduced: parchment, EB Garamond, IBM Plex Mono for the marks
 //     in the margin, a 2px ink rule over a hairline under every section head.
+//   TALKS_STYLESHEET — the same site sheet plus the light table: /talks lays
+//     every deck out as a transparency, and /talks/<slug> uses the same rules
+//     for the frame it mounts a deck in. A deck's own theme is not here — it
+//     ships inside the deck and is made for a projector, not for this paper.
 //
 // The design pass the old note here promised is the one that produced them.
 
@@ -203,6 +207,11 @@ a:hover { color: var(--accent); }
 
 .page { max-width: 760px; margin: 0 auto; padding: 8px 40px 72px; }
 
+/* Set on <body> by layout({ wide: true }). The nav rule and the footer rule are
+   separate elements with their own max-width, so all three have to grow
+   together or the masthead stops being the same line as the content. */
+.wide .page, .wide .sitenav, .wide .sitefoot { max-width: 1040px; }
+
 /* The masthead rule, the same 2px-ink-over-hairline as the homepage sections. */
 .sitenav {
   max-width: 760px;
@@ -373,8 +382,155 @@ a:hover { color: var(--accent); }
 }
 `;
 
+/* --- /talks ------------------------------------------------------------------
+ *
+ * The index is a light table: every deck laid out flat as a transparency, taped
+ * at the top, in the order the registry gives them.
+ *
+ * Section VI of the homepage shows three of these same transparencies in a
+ * stack you shuffle. The ornament is deliberately identical — the same wash,
+ * the same hairline, the same tape — but the geometry is not shared and should
+ * not be: there the cards are absolutely positioned on top of one another and
+ * their order is the point; here they sit in the flow and the whole shelf is
+ * visible at once. Copying eight declarations is cheaper than an abstraction
+ * that has to serve both.
+ */
+const TALKS_CSS = `
+.sheet {
+  list-style: none;
+  margin: 26px 0 0;
+  padding: 0;
+  display: grid;
+  grid-template-columns: repeat(auto-fill, minmax(320px, 1fr));
+  gap: 30px 26px;
+}
+.sheet > li { margin: 0; }
+
+.sheet-card {
+  position: relative;
+  display: flex;
+  flex-direction: column;
+  height: 100%;
+  padding: 28px 30px 22px;
+  text-decoration: none;
+  color: inherit;
+  background:
+    linear-gradient(135deg, rgba(86, 112, 125, 0.15), rgba(86, 112, 125, 0.06) 55%, rgba(241, 234, 217, 0.25)),
+    var(--paper);
+  border: 1px solid rgba(42, 36, 27, 0.45);
+  box-shadow: 2px 3px 0 rgba(42, 36, 27, 0.08), inset 0 0 0 1px rgba(241, 234, 217, 0.5);
+  transition: transform .25s cubic-bezier(.22, 1, .36, 1), box-shadow .25s ease;
+}
+.sheet-card:hover, .sheet-card:focus-visible {
+  transform: translate(-1px, -2px);
+  box-shadow: 4px 6px 0 rgba(42, 36, 27, 0.1), inset 0 0 0 1px rgba(241, 234, 217, 0.6);
+}
+.sheet-card .tape {
+  position: absolute;
+  top: -8px; left: 50%;
+  transform: translateX(-50%) rotate(-1.2deg);
+  width: 104px; height: 17px;
+  background: rgba(241, 234, 217, 0.85);
+  border: 1px solid rgba(42, 36, 27, 0.18);
+}
+/* Every other card leans the other way, so the shelf does not read as a grid
+   of identical stickers. */
+.sheet > li:nth-child(even) .sheet-card .tape { transform: translateX(-50%) rotate(1.4deg); }
+
+.sheet-meta {
+  display: flex;
+  justify-content: space-between;
+  gap: 12px;
+  font-family: var(--mono);
+  font-size: 10px;
+  letter-spacing: .2em;
+  color: #56707d;
+}
+.sheet-title {
+  margin: 16px 0 0;
+  font-size: 25px;
+  font-weight: 500;
+  line-height: 1.2;
+  color: var(--ink);
+  text-wrap: pretty;
+}
+.sheet-card:hover .sheet-title { color: var(--accent); }
+.sheet-rule {
+  display: block;
+  border-top: 1px solid var(--ink);
+  border-bottom: 1px solid var(--ink);
+  height: 2px;
+  width: 64px;
+  margin: 14px 0 12px;
+}
+.sheet-venue { font-family: var(--mono); font-size: 11px; letter-spacing: .1em; color: var(--accent); }
+.sheet-summary {
+  margin: 10px 0 0;
+  font-size: 15.5px;
+  line-height: 1.5;
+  color: var(--body-soft);
+  text-wrap: pretty;
+}
+.sheet-foot {
+  display: flex;
+  justify-content: space-between;
+  gap: 12px;
+  margin-top: auto;
+  padding-top: 18px;
+  font-family: var(--mono);
+  font-size: 10px;
+  letter-spacing: .1em;
+  color: var(--muted);
+}
+.sheet-foot > span:last-child { white-space: nowrap; }
+.sheet-card:hover .sheet-foot { color: var(--accent); }
+
+/* --- /talks/<slug> -----------------------------------------------------------
+ *
+ * The frame around a deck, not the deck. A deck brings its own theme because it
+ * is made for a projector; the page it is mounted on stays in the journal.
+ */
+.deck-intro { margin: 26px 0 30px; }
+.deck-intro .page-title { margin-top: 10px; }
+.deck-kicker {
+  display: flex;
+  justify-content: space-between;
+  gap: 12px;
+  padding-bottom: 8px;
+  border-bottom: 2px solid var(--ink);
+  font-family: var(--mono);
+  font-size: 10px;
+  letter-spacing: .18em;
+  color: var(--faded);
+}
+.deck-kicker a { color: var(--muted); text-decoration: none; }
+.deck-kicker a:hover { color: var(--accent); }
+.deck-intro .rule-short {
+  display: block;
+  border-top: 1px solid var(--ink);
+  border-bottom: 1px solid var(--ink);
+  height: 2px;
+  width: 64px;
+  margin: 14px 0 12px;
+}
+
+@media (max-width: 720px) {
+  .sheet { gap: 26px 0; margin-top: 22px; }
+  .sheet-card { padding: 24px 22px 18px; }
+  /* A long slug and "read the deck" do not fit on one line at this width, and
+     a wrapped slug should not push the arrow onto a line of its own. */
+  .sheet-foot { flex-direction: column; align-items: flex-start; gap: 4px; }
+}
+@media (prefers-reduced-motion: reduce) {
+  .sheet-card { transition: none; }
+}
+`;
+
 /** The blog and the 404. */
 export const SITE_STYLESHEET = SITE_CSS;
+
+/** /talks and /talks/<slug>: the site sheet plus the light table. */
+export const TALKS_STYLESHEET = SITE_CSS + TALKS_CSS;
 
 // --- /resume on screen -------------------------------------------------------
 //
