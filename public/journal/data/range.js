@@ -11,8 +11,8 @@
 // real data means a skills-per-role table first.
 //
 // Divergence from the handoff bundle: the vr-dir ridge's title and story were
-// updated for the Dec 2025 and Aug 2026 promotions. Every number is the
-// handoff's.
+// updated for the Jan 2026 and Aug 2026 promotions, and the auburn ridge was
+// corrected to the real role. Every other number is the handoff's.
 export const fams = [
   { id: 'sys',  name: 'systems & ops' },
   { id: 'lang', name: 'languages' },
@@ -126,7 +126,7 @@ export const ridges = [
       'Established OIDC as the platform’s universal identity layer; DPoP and token-exchange flows for cross-platform handoffs.',
       'Delivered the full key-management modality matrix: Vault-style managed keys, AWS KMS, GCP KMS, and HSM root-key custody.',
       'Drove the strategic case for SaaS dogfooding, securing a dedicated business unit; authored the org’s AI development policy.'],
-    story: 'Director of Platform, then Sr Director (Dec 2025), then VP of Engineering, Platform (Aug 2026) — one ridge, because the work did not change shape at the title. The widest ridge on the chart: identity, crypto, SaaS, strategy — with honest gaps between peaks where frontend used to be.',
+    story: 'Director of Platform, then Senior Director of Engineering (Jan 2026), then VP of Engineering, Platform (Aug 2026) — one ridge, because the work did not change shape at the title. The widest ridge on the chart: identity, crypto, SaaS, strategy — with honest gaps between peaks where frontend used to be.',
     use: { oidc: [1, 3], crypto: [0.9, 3], abac: [0.75, 2], tlspki: [0.6, 2], sdk: [0.7, 2], saas: [0.9, 3], strategy: [0.9, 2], orgdesign: [0.7, 2], productcollab: [0.6, 2], mentorship: [0.6, 1], hiring: [0.4, 1], aigov: [0.55, 2], cli: [0.45, 1], oss: [0.8, 2], eventdriven: [0.4, 1], observability: [0.3, 1], go: [0.45, 1], kubernetes: [0.3, 1] } },
   { id: 'homelab', kind: 'project', company: '', title: 'Homelab', start: 2008.4, end: 2026.65, color: '#b08b3f',
     story: 'The homelab runs under everything — the connective tissue between roles. Plateaus are settled periods; the shafts between them are the moves. Its on-prem plateau is the last one anywhere: 2014.',

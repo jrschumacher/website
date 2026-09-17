@@ -9,7 +9,11 @@ export async function loadBacklog(DB) {
   const [companies, roles, accomplishments, profile] = await DB.batch([
     DB.prepare("SELECT key, display, location, sort_order FROM companies ORDER BY sort_order"),
     DB.prepare("SELECT id, company_key, title, start, end, note, sort_order FROM roles ORDER BY sort_order"),
-    DB.prepare("SELECT id, role_id, bullet, tags, metric, date_added, notes FROM accomplishments ORDER BY id"),
+    // `notes` is deliberately absent. It is working commentary — internal
+    // reasoning, vendor comparisons, job-search thinking — and nothing in the
+    // assembler or any renderer reads it. Selecting a column no one uses is how
+    // it ends up in an output by accident later.
+    DB.prepare("SELECT id, role_id, bullet, tags, metric, date_added FROM accomplishments ORDER BY id"),
     DB.prepare("SELECT section, key, value FROM profile"),
   ]);
 

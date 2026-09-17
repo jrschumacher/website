@@ -97,7 +97,16 @@ Two D1 bindings, both read-only from this Worker:
   that the private [resume Worker](https://github.com/jrschumacher/resume)
   uses. That database also holds job-hunt data; the split exists so this Worker
   has no binding that could reach it.
-  `db/0001_seed_public_resume.sql` is the one-time copy that seeded it.
+  `db/0001_seed_public_resume.sql` is the one-time copy that seeded it, and
+  `bin/publish-resume` is how it is refreshed since. Nothing refreshes it
+  automatically: the private Worker has no binding to this database and never
+  had one, so between the split and that script the two diverged silently —
+  every bullet written on the private side went somewhere this site cannot
+  read. Publishing is a disclosure decision, so it stays a thing a human runs
+  after reading the diff. The script never copies `accomplishments.notes` or
+  `roles.note` (working commentary on one side, rendered copy on the other),
+  skips bullets tagged `private`, and publishes only allowlisted targets — a
+  target names the job being applied for.
 
 - **`BLOG` → `personal-blog`** (`2aec93a1-cc30-4480-b3e7-31611f15f2bf`)
   The published shelf, written by a Cairn publish step. A post is visible here
