@@ -214,11 +214,11 @@ test("the index lists title, date, venue and summary in the order given", () => 
   ]);
 
   assert.ok(html.indexOf("Later talk") < html.indexOf("Earlier talk"), "caller order preserved");
-  assert.match(html, /<a class="sheet-card" href="\/talks\/later">/);
-  assert.match(html, /<h2 class="sheet-title">Later talk<\/h2>/);
+  assert.match(html, /<a class="shelf-card" href="\/talks\/later">/);
+  assert.match(html, /<h2 class="shelf-title">Later talk<\/h2>/);
   assert.match(html, /<time datetime="2026-09-12">12 Sep 2026<\/time>/);
-  assert.match(html, /<span class="sheet-venue">SomeConf<\/span>/);
-  assert.match(html, /<span class="sheet-summary">Newest\.<\/span>/);
+  assert.match(html, /<span class="shelf-venue">SomeConf<\/span>/);
+  assert.match(html, /<span class="shelf-summary">Newest\.<\/span>/);
   assert.match(html, /<a href="\/talks" aria-current="page">Talks<\/a>/);
 });
 
@@ -235,16 +235,16 @@ test("the index numbers each card by its position on the shelf", () => {
 
 test("the index closes up around a deck with no date, venue or summary", () => {
   const html = renderTalksIndex([{ slug: "bare", meta: { title: "Bare", fonts: [] } }]);
-  assert.match(html, /<h2 class="sheet-title">Bare<\/h2>/);
-  assert.ok(!html.includes('class="sheet-venue"'), "no empty venue line");
-  assert.ok(!html.includes('class="sheet-summary"'), "no empty summary line");
+  assert.match(html, /<h2 class="shelf-title">Bare<\/h2>/);
+  assert.ok(!html.includes('class="shelf-venue"'), "no empty venue line");
+  assert.ok(!html.includes('class="shelf-summary"'), "no empty summary line");
   assert.match(html, /<span>TALK<\/span>/, "a label stands where the date would be");
 });
 
 test("the index has an honest empty state", () => {
   const html = renderTalksIndex([]);
   assert.match(html, /No talks published yet\./);
-  assert.ok(!html.includes('<ul class="sheet">'));
+  assert.ok(!html.includes('<ul class="shelf">'));
 });
 
 test("the deck page frames the deck in the journal, and links back to the shelf", () => {

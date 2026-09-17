@@ -4,6 +4,8 @@
 // values, moved into classes so the markup stays readable and the two figures
 // can share one set of paper rules. Tokens first, then the page top to bottom.
 
+import { CASE_STUDY_CSS } from "./case-css.js";
+
 export const JOURNAL_STYLESHEET = `
 :root {
   --paper: #f1ead9;
@@ -415,53 +417,15 @@ a:hover { color: var(--accent); }
 }
 .chip.is-lit { border-color: var(--accent); color: var(--accent); }
 
-/* --- IV · case studies --------------------------------------------------- */
+${CASE_STUDY_CSS}
 
-.cs-list { display: flex; flex-direction: column; }
-.cs { padding: 34px 0 24px; border-bottom: 1px solid var(--rule-light); }
-.cs-title {
-  margin-top: 10px;
-  font-variant: small-caps;
-  letter-spacing: .08em;
-  font-size: 26px;
-  font-weight: 600;
-  line-height: 1.2;
+.cs-more {
+  margin: 18px 0 0;
+  font-size: 11px;
+  letter-spacing: .14em;
 }
-.cs .rule-short { margin: 14px 0 6px; }
-.cs-grid {
-  display: grid;
-  grid-template-columns: minmax(0, 1.35fr) minmax(280px, 1fr);
-  gap: 40px;
-  align-items: start;
-  margin-top: 10px;
-}
-.cs-story { margin: 0; font-size: 17px; line-height: 1.6; color: var(--body); text-wrap: pretty; }
-.cs-story + .cs-story { margin-top: 12px; }
-.cs-stat {
-  margin-top: 20px;
-  display: flex; align-items: baseline; gap: 16px; flex-wrap: wrap;
-  border-top: 1px solid var(--ink);
-  border-bottom: 1px solid var(--rule);
-  padding: 12px 0;
-}
-.cs-stat-big { font-size: 42px; font-weight: 500; line-height: 1; }
-.cs-stat-note { font-size: 10.5px; letter-spacing: .08em; color: var(--muted); }
-.cs .card-facts { margin-top: 14px; gap: 6px; }
-.cs-fig { margin: 0; }
-.cs-fig-frame {
-  background: var(--panel);
-  border: 1px solid var(--ink);
-  box-shadow: var(--frame);
-  padding: 18px 14px 8px;
-}
-.cs-diagram { width: 100%; height: auto; display: block; }
-.cs-fig figcaption {
-  margin-top: 9px;
-  font-variant: small-caps;
-  letter-spacing: .1em;
-  font-size: 13.5px;
-  color: var(--body-soft);
-}
+.cs-more a { color: var(--muted); text-decoration: none; border-bottom: 1px solid var(--rule); }
+.cs-more a:hover { color: var(--accent); border-bottom-color: var(--accent); }
 
 /* --- V · field notes ----------------------------------------------------- */
 

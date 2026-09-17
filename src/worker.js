@@ -11,6 +11,7 @@ import { handleHome } from "./routes/home.js";
 import { handleResumeHtml, handleResumeText } from "./routes/resume.js";
 import { handleBlogIndex, handleBlogPost } from "./routes/blog.js";
 import { handleTalksIndex, handleTalk, handlePatternSvg } from "./routes/talks.js";
+import { handleWorkIndex, handleWork } from "./routes/work.js";
 import { layout } from "./render/layout.js";
 
 function plain(body, status) {
@@ -26,7 +27,7 @@ function notFound() {
       title: "Not found — Ryan Schumacher",
       body: `<h1 class="page-title">Not found</h1>
 <p class="page-lede">There is nothing at this address.</p>
-<div class="empty"><p><a href="/">The record</a> · <a href="/blog">Blog</a> · <a href="/resume">Résumé</a></p></div>`,
+<div class="empty"><p><a href="/">The record</a> · <a href="/work">Case studies</a> · <a href="/blog">Blog</a> · <a href="/talks">Talks</a> · <a href="/resume">Résumé</a></p></div>`,
     }),
     { status: 404, headers: { "content-type": "text/html; charset=utf-8" } },
   );
@@ -70,6 +71,11 @@ export default {
         response = await handleResumeHtml(request, env);
       } else if (path === "/resume.txt") {
         response = await handleResumeText(request, env);
+      } else if (path === "/work") {
+        response = await handleWorkIndex(request, env);
+      } else if (path.startsWith("/work/")) {
+        const slug = decodeURIComponent(path.slice("/work/".length));
+        response = slug ? await handleWork(request, env, slug) : null;
       } else if (path === "/blog") {
         response = await handleBlogIndex(request, env);
       } else if (path.startsWith("/blog/")) {

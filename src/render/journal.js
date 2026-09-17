@@ -7,7 +7,7 @@
 // already reads without it.
 
 import { escapeHtml } from "../format.js";
-import { caseDiagram } from "./diagrams.js";
+import { caseStudyArticle } from "./case-study.js";
 import { JOURNAL_STYLESHEET, talkStackRules } from "./journal-css.js";
 import { NAV } from "./layout.js";
 import { sections, caseStudies, notes, contact } from "../../public/journal/data/site.js";
@@ -174,32 +174,26 @@ ${rangeAside(RANGE_INITIAL)}
 </section>`;
 }
 
+/**
+ * Section IV. The three most recent case studies, and a way to the rest.
+ *
+ * Three because the section is the homepage's argument, not its archive: the
+ * full set lives at /work, each one at /work/<slug>, and the articles here are
+ * the same markup from the same module so the two never drift.
+ */
 function work() {
-  const entries = caseStudies
-    .map((cs) => `<article class="cs">
-<div class="kicker">CASE STUDY № ${e(cs.num)} · ${e(cs.kicker)}</div>
-<div class="cs-title" style="color: ${e(cs.tint)}">${e(cs.title)}</div>
-<div class="rule-short"></div>
-<div class="cs-grid">
-<div>
-<p class="cs-story">${e(cs.story)}</p>
-<p class="cs-story">${e(cs.story2)}</p>
-<div class="cs-stat">
-<span class="cs-stat-big" style="color: ${e(cs.tint)}">${e(cs.statBig)}</span>
-<span class="cs-stat-note mono">${e(cs.statNote)}</span>
-</div>
-<div class="card-facts">${cs.facts.map((f) => `<div class="fact">${e(f)}</div>`).join("")}</div>
-</div>
-<figure class="cs-fig">
-<div class="cs-fig-frame">${caseDiagram(cs.diagram, cs.tint)}</div>
-<figcaption>${e(cs.figCaption)}</figcaption>
-</figure>
-</div>
-</article>`)
+  const shown = caseStudies.slice(0, 3);
+  const entries = shown
+    .map((cs) => caseStudyArticle(cs, { href: `/work/${encodeURIComponent(cs.slug)}` }))
     .join("");
+  const more =
+    caseStudies.length > shown.length
+      ? `all ${caseStudies.length} case studies →`
+      : "case studies, one page each →";
   return `<section id="work" data-site-section class="sec-work">
 ${sectionHead("IV", "case studies", "the work, up close")}
 <div class="cs-list">${entries}</div>
+<p class="cs-more mono"><a href="/work">${e(more)}</a></p>
 </section>`;
 }
 
@@ -320,7 +314,7 @@ function colophon() {
   return `<footer class="colophon mono">
 <p>colophon — set in eb garamond &amp; ibm plex mono · figures drawn from the record</p>
 <p><a href="mailto:j.r.schumacher@gmail.com">email</a> · <a href="https://github.com/jrschumacher">github</a> · <a href="https://linkedin.com/in/jrschumacher">linkedin</a></p>
-<p><a href="/blog">blog</a> · <a href="/talks">talks</a> · <a href="/resume">résumé</a> · <a href="/resume.txt">plain text</a></p>
+<p><a href="/work">case studies</a> · <a href="/blog">blog</a> · <a href="/talks">talks</a> · <a href="/resume">résumé</a> · <a href="/resume.txt">plain text</a></p>
 <p>© 2026 ryan schumacher · field notes from the record</p>
 </footer>`;
 }

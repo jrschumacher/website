@@ -43,7 +43,7 @@ const e = escapeHtml;
  * @param {{ slug: string, meta: object }[]} decks
  */
 export function renderTalksIndex(decks) {
-  const body = decks.length ? deckSheet(decks) : emptyState();
+  const body = decks.length ? deckShelf(decks) : emptyState();
   return layout({
     title: "Talks — Ryan Schumacher",
     description: "Talks and slide decks by Ryan Schumacher.",
@@ -56,26 +56,26 @@ ${body}`,
   });
 }
 
-function deckSheet(decks) {
+function deckShelf(decks) {
   const n = decks.length;
-  const items = decks.map((deck, i) => sheetCard(deck, i, n)).join("\n");
-  return `<ul class="sheet">${items}</ul>`;
+  const items = decks.map((deck, i) => shelfCard(deck, i, n)).join("\n");
+  return `<ul class="shelf">${items}</ul>`;
 }
 
-function sheetCard({ slug, meta }, i, n) {
+function shelfCard({ slug, meta }, i, n) {
   const position = `${pad(i + 1)} / ${pad(n)}`;
   // The left slot is the date when the deck has one. "TALK" is what stands
   // there until it does — a label rather than an empty half of a rule.
   const stamp = dateLine(meta.date) || "TALK";
   return `<li>
-  <a class="sheet-card" href="/talks/${encodeURIComponent(slug)}">
+  <a class="shelf-card" href="/talks/${encodeURIComponent(slug)}">
     <span class="tape" aria-hidden="true"></span>
-    <span class="sheet-meta"><span>${stamp}</span><span>TRANSPARENCY ${position}</span></span>
-    <h2 class="sheet-title">${e(meta.title)}</h2>
-    <span class="sheet-rule" aria-hidden="true"></span>
-    ${meta.venue ? `<span class="sheet-venue">${e(meta.venue)}</span>` : ""}
-    ${meta.summary ? `<span class="sheet-summary">${e(meta.summary)}</span>` : ""}
-    <span class="sheet-foot"><span>${e(slug)}</span><span>read the deck →</span></span>
+    <span class="shelf-meta"><span>${stamp}</span><span>TRANSPARENCY ${position}</span></span>
+    <h2 class="shelf-title">${e(meta.title)}</h2>
+    <span class="shelf-rule" aria-hidden="true"></span>
+    ${meta.venue ? `<span class="shelf-venue">${e(meta.venue)}</span>` : ""}
+    ${meta.summary ? `<span class="shelf-summary">${e(meta.summary)}</span>` : ""}
+    <span class="shelf-foot"><span>${e(slug)}</span><span>read the deck →</span></span>
   </a>
 </li>`;
 }

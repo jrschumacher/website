@@ -12,6 +12,7 @@ const e = escapeHtml;
 
 export const NAV = [
   { href: "/", label: "The record", key: "home" },
+  { href: "/work", label: "Case studies", key: "work" },
   { href: "/blog", label: "Blog", key: "blog" },
   { href: "/talks", label: "Talks", key: "talks" },
   { href: "/resume", label: "Résumé", key: "resume" },

@@ -9,14 +9,17 @@ export const sections = [
   { id: 'contact', num: 'VII', label: 'contact' },
 ];
 
+// Case studies. `slug` is the permalink at /work/<slug> and is deliberately not
+// derived from the title: a title can be rewritten, a URL that is already in
+// someone's hands cannot.
 export const caseStudies = [
-  { num: '01', kicker: 'VIRTRU \u00b7 2024 \u00b7 PLATFORM', title: 'The monolith, reconsidered', tint: '#16484c',
+  { slug: 'monolith-reconsidered', num: '01', kicker: 'VIRTRU \u00b7 2024 \u00b7 PLATFORM', title: 'The monolith, reconsidered', tint: '#16484c',
     story: 'OpenTDF ran as polyglot microservices \u2014 fine on Kubernetes, impossible in an air gap. Over three months the services were refolded into a Go modular monolith: one binary, module seams kept honest, deployable anywhere a process can run.',
     story2: 'The air gap was the forcing function: no Kubernetes, no sidecar mesh, no shared cloud services \u2014 just a process on a machine someone else controls. An admin CLI shipped in weeks where a web console would have taken months.',
     statBig: '3 months', statNote: 'polyglot fleet \u2192 one Go binary',
     figCaption: 'fig. a \u2014 twelve services, folded to one', diagram: 'consolidate',
     facts: ['3 months \u00b7 polyglot \u2192 one Go binary', 'unlocked air-gapped deployments beyond k8s', 'admin CLI over web UI \u2014 shipped in weeks, not months'], },
-  { num: '02', kicker: 'VIRTRU \u00b7 2021\u20132024 \u00b7 GROWTH', title: 'Branding, self-served', tint: '#b3703a',
+  { slug: 'branding-self-served', num: '02', kicker: 'VIRTRU \u00b7 2021\u20132024 \u00b7 GROWTH', title: 'Branding, self-served', tint: '#b3703a',
     story: 'Custom branding was a services engagement: slow, manual, gated on engineers. Making it self-service turned a bottleneck into a product surface \u2014 customers themed their own deployments the day they asked.',
     story2: 'The full entry will cover the theming pipeline, the guardrails that kept brand assets safe, and why the sales curve bent the quarter it launched.',
     statBig: '+650%', statNote: 'sales on the branded tier \u00b7 +5% ARR',

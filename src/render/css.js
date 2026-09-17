@@ -1,6 +1,8 @@
+import { CASE_MARKS, CASE_STUDY_CSS } from "./case-css.js";
+
 // The stylesheets for everything that is not the homepage.
 //
-// Three of them, because the pages want different paper:
+// Four of them, because the pages want different paper:
 //
 //   RESUME_STYLESHEET — the canonical résumé stylesheet ported from
 //     jrschumacher/resume (src/render/css.js), still unchanged in its résumé
@@ -9,6 +11,9 @@
 //   SITE_STYLESHEET — the blog and the 404, in the field-journal palette the
 //     homepage introduced: parchment, EB Garamond, IBM Plex Mono for the marks
 //     in the margin, a 2px ink rule over a hairline under every section head.
+//   WORK_STYLESHEET — /work and /work/<slug>, the site sheet plus the very
+//     rules section IV of the homepage renders case studies with, imported
+//     from case-css.js rather than written a second time.
 //   TALKS_STYLESHEET — the same site sheet plus the light table: /talks lays
 //     every deck out as a transparency, and /talks/<slug> uses the same rules
 //     for the frame it mounts a deck in. A deck's own theme is not here — it
@@ -384,8 +389,10 @@ a:hover { color: var(--accent); }
 
 /* --- /talks ------------------------------------------------------------------
  *
- * The index is a light table: every deck laid out flat as a transparency, taped
- * at the top, in the order the registry gives them.
+ * The index is a light table — .shelf — with every deck laid out flat as a
+ * transparency, taped at the top, in the order the registry gives them. (The
+ * journal's own sheet uses .sheet for its page frame; these never meet, but
+ * the names should not read as if they might.)
  *
  * Section VI of the homepage shows three of these same transparencies in a
  * stack you shuffle. The ornament is deliberately identical — the same wash,
@@ -396,7 +403,7 @@ a:hover { color: var(--accent); }
  * that has to serve both.
  */
 const TALKS_CSS = `
-.sheet {
+.shelf {
   list-style: none;
   margin: 26px 0 0;
   padding: 0;
@@ -404,9 +411,9 @@ const TALKS_CSS = `
   grid-template-columns: repeat(auto-fill, minmax(320px, 1fr));
   gap: 30px 26px;
 }
-.sheet > li { margin: 0; }
+.shelf > li { margin: 0; }
 
-.sheet-card {
+.shelf-card {
   position: relative;
   display: flex;
   flex-direction: column;
@@ -421,11 +428,11 @@ const TALKS_CSS = `
   box-shadow: 2px 3px 0 rgba(42, 36, 27, 0.08), inset 0 0 0 1px rgba(241, 234, 217, 0.5);
   transition: transform .25s cubic-bezier(.22, 1, .36, 1), box-shadow .25s ease;
 }
-.sheet-card:hover, .sheet-card:focus-visible {
+.shelf-card:hover, .shelf-card:focus-visible {
   transform: translate(-1px, -2px);
   box-shadow: 4px 6px 0 rgba(42, 36, 27, 0.1), inset 0 0 0 1px rgba(241, 234, 217, 0.6);
 }
-.sheet-card .tape {
+.shelf-card .tape {
   position: absolute;
   top: -8px; left: 50%;
   transform: translateX(-50%) rotate(-1.2deg);
@@ -435,9 +442,9 @@ const TALKS_CSS = `
 }
 /* Every other card leans the other way, so the shelf does not read as a grid
    of identical stickers. */
-.sheet > li:nth-child(even) .sheet-card .tape { transform: translateX(-50%) rotate(1.4deg); }
+.shelf > li:nth-child(even) .shelf-card .tape { transform: translateX(-50%) rotate(1.4deg); }
 
-.sheet-meta {
+.shelf-meta {
   display: flex;
   justify-content: space-between;
   gap: 12px;
@@ -446,7 +453,7 @@ const TALKS_CSS = `
   letter-spacing: .2em;
   color: #56707d;
 }
-.sheet-title {
+.shelf-title {
   margin: 16px 0 0;
   font-size: 25px;
   font-weight: 500;
@@ -454,8 +461,8 @@ const TALKS_CSS = `
   color: var(--ink);
   text-wrap: pretty;
 }
-.sheet-card:hover .sheet-title { color: var(--accent); }
-.sheet-rule {
+.shelf-card:hover .shelf-title { color: var(--accent); }
+.shelf-rule {
   display: block;
   border-top: 1px solid var(--ink);
   border-bottom: 1px solid var(--ink);
@@ -463,15 +470,15 @@ const TALKS_CSS = `
   width: 64px;
   margin: 14px 0 12px;
 }
-.sheet-venue { font-family: var(--mono); font-size: 11px; letter-spacing: .1em; color: var(--accent); }
-.sheet-summary {
+.shelf-venue { font-family: var(--mono); font-size: 11px; letter-spacing: .1em; color: var(--accent); }
+.shelf-summary {
   margin: 10px 0 0;
   font-size: 15.5px;
   line-height: 1.5;
   color: var(--body-soft);
   text-wrap: pretty;
 }
-.sheet-foot {
+.shelf-foot {
   display: flex;
   justify-content: space-between;
   gap: 12px;
@@ -482,8 +489,8 @@ const TALKS_CSS = `
   letter-spacing: .1em;
   color: var(--muted);
 }
-.sheet-foot > span:last-child { white-space: nowrap; }
-.sheet-card:hover .sheet-foot { color: var(--accent); }
+.shelf-foot > span:last-child { white-space: nowrap; }
+.shelf-card:hover .shelf-foot { color: var(--accent); }
 
 /* --- /talks/<slug> -----------------------------------------------------------
  *
@@ -515,14 +522,14 @@ const TALKS_CSS = `
 }
 
 @media (max-width: 720px) {
-  .sheet { gap: 26px 0; margin-top: 22px; }
-  .sheet-card { padding: 24px 22px 18px; }
+  .shelf { gap: 26px 0; margin-top: 22px; }
+  .shelf-card { padding: 24px 22px 18px; }
   /* A long slug and "read the deck" do not fit on one line at this width, and
      a wrapped slug should not push the arrow onto a line of its own. */
-  .sheet-foot { flex-direction: column; align-items: flex-start; gap: 4px; }
+  .shelf-foot { flex-direction: column; align-items: flex-start; gap: 4px; }
 }
 @media (prefers-reduced-motion: reduce) {
-  .sheet-card { transition: none; }
+  .shelf-card { transition: none; }
 }
 `;
 
@@ -531,6 +538,37 @@ export const SITE_STYLESHEET = SITE_CSS;
 
 /** /talks and /talks/<slug>: the site sheet plus the light table. */
 export const TALKS_STYLESHEET = SITE_CSS + TALKS_CSS;
+
+/* --- /work -------------------------------------------------------------------
+ *
+ * The case studies themselves come from case-css.js, the same rules section IV
+ * of the homepage is built from. Only what is particular to standing alone on
+ * a page of its own is here.
+ */
+const WORK_CSS = `
+.cs-list > .cs:first-child { padding-top: 22px; border-top: 1px solid var(--rule); }
+.cs-title { margin: 10px 0 0; }
+h1.cs-title, h2.cs-title { font-size: 30px; }
+/* The title is already the study's colour; hovering it underlines rather than
+   recolouring, so the tint stays the tint. */
+.cs-title-link { color: inherit; text-decoration: none; }
+.cs-title-link:hover {
+  text-decoration: underline;
+  text-decoration-thickness: 1px;
+  text-underline-offset: 5px;
+}
+/* One study on its own page: no rule above it, since the nav rule is already
+   there, and none below it, since nothing follows. */
+.cs-solo > .cs { border-bottom: 0; padding-bottom: 8px; }
+.cs-solo > .cs:first-child { border-top: 0; padding-top: 4px; }
+
+@media (max-width: 860px) {
+  .cs-grid { grid-template-columns: 1fr; gap: 26px; }
+}
+`;
+
+/** /work and /work/<slug>: the site sheet plus the case-study block. */
+export const WORK_STYLESHEET = SITE_CSS + CASE_MARKS + CASE_STUDY_CSS + WORK_CSS;
 
 // --- /resume on screen -------------------------------------------------------
 //
