@@ -22,6 +22,7 @@ One Cloudflare Worker. Server-rendered HTML, no framework, no build step.
 | `/resume.txt`  | The same résumé as plain text (the LinkedIn-paste copy)     |
 | `/llms.txt`    | The site as a map for machines (llmstxt.org)                |
 | `/sitemap.xml` | The same map for crawlers; `robots.txt` points at it        |
+| `/feed.xml`    | The blog as Atom — full posts, and a living one says so     |
 
 Anything else is a 404. Anything that is not `GET`/`HEAD` is a 405.
 
@@ -169,6 +170,16 @@ called by `layout()` and by the homepage's own document — so a new page cannot
 ship without them, and the card is built from the same title and description
 the page already has rather than from a second set of strings that can drift.
 
+`/feed.xml` is the blog as Atom, assembled in `src/render/feed.js`. Atom rather
+than RSS because of the living posts: an Atom entry carries `<published>` and
+`<updated>` over one stable `<id>`, so a post that is revised shows up in a
+reader as changed rather than as a duplicate, which is the whole model this blog
+runs on. Entries carry the full post, not a teaser — the revision notes at the
+end of a living post are the part a returning reader came for. The blog pages
+offer it in their `<head>` and in the page itself; no other page does, since a
+subscription to the résumé would be a subscription to a document that does not
+change.
+
 `/sitemap.xml` is the same idea for crawlers: assembled in
 `src/render/sitemap.js` from the case-study data, the deck registry and the live
 posts in D1, with a `<lastmod>` only where a record actually carries one.
@@ -205,10 +216,32 @@ PNGs. The output is committed, so a deploy needs neither Chrome nor the network,
 and nothing at request time reads any of this — the Worker serves them as static
 assets like any other file in `public/`.
 
+## Headers
+
+Every response from the Worker leaves through `harden()` in `src/headers.js`,
+which adds a Content Security Policy, `X-Content-Type-Options: nosniff` and
+`Referrer-Policy: strict-origin-when-cross-origin`. A route that sets one of
+those itself keeps its own: it is a floor, not a ceiling.
+
+The policy is strict because this site can afford it — server-rendered HTML, no
+forms, no third-party scripts, no analytics. `style-src` carries
+`'unsafe-inline'` and that is load-bearing rather than lazy: every stylesheet
+here is inlined in a `<style>` and generated per page, so a hash would break on
+any edit. `script-src` does **not**: the two module scripts are served from this
+origin, and the résumé's one inline `onclick="window.print()"` is allowed by
+hash, with `'unsafe-hashes'`, which is what makes a hash cover an event handler.
+Change that handler and the print button stops working until the hash in
+`src/headers.js` is recomputed — `test/headers.test.mjs` reads the handler out of
+the rendered page and fails if the two have drifted.
+
+Static assets are served by the assets layer ahead of the Worker and do not
+carry these headers. That is the right shape: a CSP governs documents, and every
+document comes from the Worker.
+
 ## Develop
 
 ```sh
-npm install
+npm ci            # package-lock.json is committed; `ci` installs exactly it
 npm run dev
 npm test          # renderers, parsers, the share cards and the sitemap
 npm run deploy
@@ -237,8 +270,12 @@ zone moved to Cloudflare and the routes went in.)
 
 ## CI
 
-`.github/workflows/test.yml` runs `npm test` and then `npx wrangler deploy
---dry-run` — on pull requests, and on pushes to `main`. Cloudflare Workers
+`.github/workflows/test.yml` runs `npm ci`, then `npm test`, then `npx wrangler
+deploy --dry-run` — on pull requests, and on pushes to `main`. `ci` rather than
+`install` because the lockfile is committed: it installs exactly what the lock
+says and fails if the lock and `package.json` disagree, so a green run is a
+statement about this commit rather than about whatever npm resolved that
+morning. Cloudflare Workers
 Builds still runs the deploy itself, and a build is not a test: a registry
 importing three decks that were never committed looked healthy for two weeks
 because nothing ran the suite on push. The dry run is the other half, because

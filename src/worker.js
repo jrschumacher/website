@@ -14,8 +14,10 @@ import { handleTalksIndex, handleTalk, handlePatternSvg } from "./routes/talks.j
 import { handleWorkIndex, handleWork } from "./routes/work.js";
 import { handleLlmsTxt } from "./routes/llms.js";
 import { handleSitemap } from "./routes/sitemap.js";
+import { handleFeed } from "./routes/feed.js";
 import { layout } from "./render/layout.js";
 import { SITE_ORIGIN } from "./config.js";
+import { harden } from "./headers.js";
 
 /** The one host this site answers on; www redirects to it. */
 const CANONICAL_HOST = new URL(SITE_ORIGIN).hostname;
@@ -59,13 +61,13 @@ export default {
   async fetch(request, env) {
     const method = request.method;
     if (method !== "GET" && method !== "HEAD") {
-      return new Response("Method not allowed\n", {
+      return harden(new Response("Method not allowed\n", {
         status: 405,
         headers: {
           "content-type": "text/plain; charset=utf-8",
           allow: "GET, HEAD",
         },
-      });
+      }));
     }
 
     const url = new URL(request.url);
@@ -76,7 +78,7 @@ export default {
     // card is built from: two copies of the site's own address is one too many.
     if (url.hostname === `www.${CANONICAL_HOST}`) {
       url.hostname = CANONICAL_HOST;
-      return Response.redirect(url.toString(), 301);
+      return harden(Response.redirect(url.toString(), 301));
     }
 
     const path = normalize(url.pathname);
@@ -95,6 +97,8 @@ export default {
         response = await handleLlmsTxt(request, env);
       } else if (path === "/sitemap.xml") {
         response = await handleSitemap(request, env);
+      } else if (path === "/feed.xml") {
+        response = await handleFeed(request, env);
       } else if (path === "/work") {
         response = await handleWorkIndex(request, env);
       } else if (path.startsWith("/work/")) {
@@ -118,15 +122,17 @@ export default {
 
       // HEAD is GET without the body; let the router stay body-shaped.
       if (method === "HEAD") {
-        return new Response(null, {
-          status: response.status,
-          headers: response.headers,
-        });
+        return harden(
+          new Response(null, {
+            status: response.status,
+            headers: response.headers,
+          }),
+        );
       }
-      return response;
+      return harden(response);
     } catch (err) {
       console.error(err);
-      return plain(`Internal error: ${err?.message ?? err}\n`, 500);
+      return harden(plain(`Internal error: ${err?.message ?? err}\n`, 500));
     }
   },
 };

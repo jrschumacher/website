@@ -19,7 +19,14 @@ jobs:
       - uses: actions/setup-node@v4
         with:
           node-version: "22"
-      - run: npm install --no-audit --no-fund
+          # Restores ~/.npm between runs, keyed on the lockfile.
+          cache: npm
+      # `npm ci` rather than `npm install`: it installs exactly what
+      # package-lock.json says and fails if the lockfile and package.json
+      # disagree, which is the difference between a test run that proves
+      # something about this commit and one that proves something about
+      # whatever npm resolved this morning.
+      - run: npm ci --no-audit --no-fund
       - run: npm test
       # The bundle is the other half: `npm test` cannot see an import that only
       # the Workers bundler resolves, which is exactly how those decks hid.
