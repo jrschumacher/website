@@ -22,10 +22,20 @@ function plain(body, status) {
   });
 }
 
-function notFound() {
+/**
+ * The 404, at whatever address was asked for.
+ *
+ * The path is passed in so the page's canonical link names the URL that was
+ * actually requested rather than the homepage; `noindex` is what keeps a
+ * crawler from filing it, since a 404 that canonicalises to "/" is an
+ * invitation to treat every typo as a copy of the front page.
+ */
+function notFound(path = "/") {
   return new Response(
     layout({
       title: "Not found — Ryan Schumacher",
+      path,
+      noindex: true,
       body: `<h1 class="page-title">Not found</h1>
 <p class="page-lede">There is nothing at this address.</p>
 <div class="empty"><p><a href="/">The record</a> · <a href="/work">Case studies</a> · <a href="/blog">Blog</a> · <a href="/talks">Talks</a> · <a href="/resume">Résumé</a></p></div>`,
@@ -95,7 +105,7 @@ export default {
         response = await handlePatternSvg(request, env);
       }
 
-      if (!response) response = notFound();
+      if (!response) response = notFound(path);
 
       // HEAD is GET without the body; let the router stay body-shaped.
       if (method === "HEAD") {

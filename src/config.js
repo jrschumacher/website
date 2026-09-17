@@ -37,3 +37,17 @@ export const SITE_NAME = "aboldnewlook";
  * the page renders the empty frame rather than a stand-in face.
  */
 export const PORTRAIT = null;
+
+/**
+ * The one address this site lives at.
+ *
+ * Needed because a share card cannot be relative: Open Graph, Twitter and
+ * JSON-LD all demand absolute URLs, and so does `<link rel="canonical">`. The
+ * Worker could read the request's own origin instead, but then a page fetched
+ * through a preview URL would advertise that preview URL as canonical and
+ * invite crawlers to index it. One constant, one canonical home.
+ */
+export const SITE_ORIGIN = "https://aboldnewlook.com";
+
+/** The person the site is about. Used in the share cards and the JSON-LD. */
+export const SITE_AUTHOR = "Ryan Schumacher";

@@ -151,6 +151,45 @@ Three, because the three things want different paper:
   stylesheet ported verbatim from `jrschumacher/resume`, unchanged in its résumé
   rules. It is a document meant to print on Letter, and it stays one.
 
+## Icons, and the picture a link unfurls into
+
+Every page carries a canonical URL, an Open Graph / Twitter card, the icons and
+a small piece of JSON-LD. They are built in one place — `src/render/meta.js`,
+called by `layout()` and by the homepage's own document — so a new page cannot
+ship without them, and the card is built from the same title and description
+the page already has rather than from a second set of strings that can drift.
+
+The files themselves live in `public/` and are generated, not drawn:
+
+```
+public/favicon.svg            the mark; the source every raster icon comes from
+public/favicon.ico            16/32/48, for the browsers that cannot read an SVG
+public/apple-touch-icon.png   180, iOS home screen
+public/icon-192.png           Android
+public/icon-512.png           Android
+public/icon-maskable-512.png  Android's launcher, which crops to its own shape
+public/site.webmanifest       name, colours, and the three icons above
+public/og/*.png               1200×630 share cards, one per section
+```
+
+```sh
+npm run images          # all of it, into public/
+node bin/make-images --icons
+node bin/make-images --cards
+node bin/make-images --check   # renders nothing; reports what is missing
+```
+
+The generator is `bin/make-images`: it rasterises `public/favicon.svg` at each
+size with headless Chrome, packs the small ones into the `.ico`, and lays the
+share cards out in HTML in the journal's own palette and type, so a card cannot
+quietly stop looking like the site. EB Garamond and IBM Plex Mono are fetched
+from Google Fonts on first run and cached in the system temp directory.
+
+Edit the mark in `public/favicon.svg` and re-run the script; do not edit the
+PNGs. The output is committed, so a deploy needs neither Chrome nor the network,
+and nothing at request time reads any of this — the Worker serves them as static
+assets like any other file in `public/`.
+
 ## Develop
 
 ```sh

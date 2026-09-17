@@ -1,0 +1,20 @@
+<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 64 64" role="img" aria-label="aboldnewlook">
+  <!--
+    The site mark: the lowercase `a` of aboldnewlook, in the journal's own
+    palette, inside the double-inset frame every panel on the site is built from.
+
+    Drawn as geometry rather than set in EB Garamond on purpose. A favicon is
+    rendered in a context where no webfont ever loads, so type here would fall
+    back to whatever serif the machine happens to have, and the mark would
+    differ from one platform to the next. A circle and a bar are the same everywhere.
+
+    This file is both the icon the browser links to AND the source every raster
+    icon is rasterised from — bin/make-images renders it at 16/32/48/180/192/512.
+    Edit here and re-run that script; do not edit the PNGs.
+  -->
+  <rect width="64" height="64" fill="#f1ead9"/>
+  <rect x="3.75" y="3.75" width="56.5" height="56.5" fill="none" stroke="#2a241b" stroke-width="2.5"/>
+  <circle cx="28" cy="27" r="14" fill="none" stroke="#2a241b" stroke-width="8"/>
+  <rect x="38" y="9" width="8" height="36" fill="#2a241b"/>
+  <rect x="13" y="50" width="38" height="4" fill="#b03b1e"/>
+</svg>

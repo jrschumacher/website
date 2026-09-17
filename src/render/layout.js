@@ -7,6 +7,7 @@
 
 import { escapeHtml } from "../format.js";
 import { SITE_STYLESHEET } from "./css.js";
+import { shareHead } from "./meta.js";
 
 const e = escapeHtml;
 
@@ -48,6 +49,16 @@ function nav(current) {
  *                                   is set in the résumé's own print families)
  * @param {string} [opts.head]       extra markup for <head>; the deck pages use
  *                                   it to add their own stylesheet
+ * @param {string} [opts.path]       this page's path, for the canonical link and
+ *                                   the share card's og:url. Pass it: a page
+ *                                   that omits it canonicalises itself to "/"
+ * @param {string} [opts.image]      share-card image path (see public/og/)
+ * @param {string} [opts.imageAlt]   alt text for the share card
+ * @param {string} [opts.ogType]     og:type — "article" for posts and studies
+ * @param {string} [opts.published]  ISO date for an article
+ * @param {string} [opts.modified]   ISO date for an article
+ * @param {boolean} [opts.noindex]   ask crawlers to skip this page (the 404)
+ * @param {object} [opts.jsonLd]     schema.org object to inline
  * @param {boolean} [opts.wide]      widen the shell past the 760px reading
  *                                   column, for pages that lay cards out side
  *                                   by side rather than set prose (/talks).
@@ -55,12 +66,42 @@ function nav(current) {
  *                                   rule and the footer rule have to grow with
  *                                   the content or they stop lining up.
  * @param {string} opts.body         markup for the <main class="page"> element
- * @param {string} [opts.head]       extra markup for <head> (stylesheets, font links)
  */
-export function layout({ title, description, current, stylesheet, fonts = true, head, wide = false, body }) {
+export function layout({
+  title,
+  description,
+  current,
+  stylesheet,
+  fonts = true,
+  head,
+  wide = false,
+  body,
+  path = "/",
+  image,
+  imageAlt,
+  ogType,
+  published,
+  modified,
+  noindex = false,
+  jsonLd,
+}) {
   const desc = description
     ? `<meta name="description" content="${e(description)}">`
     : "";
+  // The canonical link, the share card, the icons and the JSON-LD. One call, so
+  // a new page cannot be added without them.
+  const share = shareHead({
+    title,
+    description,
+    path,
+    image,
+    imageAlt,
+    type: ogType,
+    published,
+    modified,
+    noindex,
+    jsonLd,
+  });
   return `<!doctype html>
 <html lang="en">
 <head>
@@ -68,6 +109,7 @@ export function layout({ title, description, current, stylesheet, fonts = true, 
 <meta name="viewport" content="width=device-width, initial-scale=1">
 <title>${e(title)}</title>
 ${desc}
+${share}
 ${fonts ? FONTS : ""}
 ${LLMS}
 <style>${stylesheet ?? SITE_STYLESHEET}</style>
