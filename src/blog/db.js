@@ -36,6 +36,49 @@ export async function listPosts(DB) {
 }
 
 /**
+ * Live posts with their bodies, newest first, for the feed.
+ *
+ * A second query rather than a column on listPosts(): the index and llms.txt
+ * render a title and a summary for every post that has ever gone live, and
+ * dragging every body through D1 to render neither of them is the kind of waste
+ * that only shows up at the hundredth post. The feed wants the opposite — few
+ * rows, all of them whole.
+ *
+ * The visibility predicate is spelled out here too, per the note at the top of
+ * this file: a query that does not carry it is a query that can leak a draft.
+ *
+ * @param {number} [limit]  how many, newest first. A feed is a window, not an
+ *   archive; the site itself is the archive, and every entry links to it.
+ */
+export async function listFeedPosts(DB, limit = 20) {
+  const [posts, tags] = await DB.batch([
+    DB.prepare(
+      `SELECT id, slug, title, summary, body, went_live_at, finalized_at, updated_at
+         FROM posts
+        WHERE ${LIVE}
+        ORDER BY went_live_at DESC, id DESC
+        LIMIT ?`,
+    ).bind(limit),
+    DB.prepare(
+      `SELECT pt.post_id, t.key, t.label
+         FROM post_tags pt
+         JOIN tags t ON t.key = pt.tag
+         JOIN posts p ON p.id = pt.post_id
+        WHERE p.went_live_at IS NOT NULL AND p.archived = 0
+        ORDER BY t.sort_order`,
+    ),
+  ]);
+
+  const byPost = new Map();
+  for (const row of tags.results ?? []) {
+    if (!byPost.has(row.post_id)) byPost.set(row.post_id, []);
+    byPost.get(row.post_id).push({ key: row.key, label: row.label });
+  }
+
+  return (posts.results ?? []).map((p) => ({ ...p, tags: byPost.get(p.id) ?? [] }));
+}
+
+/**
  * One live post by slug, with its reader-facing revision notes and tags.
  * Returns null when the slug is unknown, staged, or archived — the caller
  * cannot tell those apart, and should not be able to.

@@ -388,6 +388,18 @@ a:hover { color: var(--accent); }
 
 .backlink { margin-top: 32px; font-family: var(--mono); font-size: 11px; letter-spacing: .14em; }
 
+/*
+ * The blog's own offer of itself, under the lede: the same shape as the
+ * résumé's masthead actions — this page's business, and no other page's.
+ */
+.page-actions {
+  margin: -8px 0 26px;
+  font-family: var(--mono);
+  font-size: 11px;
+  letter-spacing: .14em;
+  color: var(--faded);
+}
+
 @media (max-width: 720px) {
   .page { padding: 4px 20px 48px; }
   .sitenav { padding: 20px 20px 10px; }

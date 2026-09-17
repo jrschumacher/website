@@ -51,7 +51,14 @@ const POST = {
  * Paths that look like files but are rendered by the Worker, not served from
  * public/ — the machine-readable renderings of pages the site already has.
  */
-const ROUTED = new Set(["/llms.txt", "/resume.md", "/resume.txt", "/deck/pattern.svg"]);
+const ROUTED = new Set([
+  "/llms.txt",
+  "/sitemap.xml",
+  "/feed.xml",
+  "/resume.md",
+  "/resume.txt",
+  "/deck/pattern.svg",
+]);
 
 /** Everything in a document's <head> that points at a file this repo serves. */
 function localAssets(html) {

@@ -8,6 +8,13 @@ import { postJsonLd } from "./meta.js";
 
 const e = escapeHtml;
 
+/**
+ * Feed discovery. It goes on the blog's own pages rather than on every page of
+ * the site: a reader who wants the feed is reading the blog, and a <link> on
+ * /resume would offer them a subscription to a document that never changes.
+ */
+const FEED_LINK = `<link rel="alternate" type="application/atom+xml" href="/feed.xml" title="aboldnewlook — blog">`;
+
 function time(raw) {
   const iso = isoDate(raw);
   const human = formatDate(raw);
@@ -29,8 +36,10 @@ export function renderBlogIndex(posts) {
     current: "blog",
     path: "/blog",
     image: "/og/blog.png",
+    head: FEED_LINK,
     body: `<h1 class="page-title">Blog</h1>
 <p class="page-lede">Notes on building things, and on working with the machines that help build them.</p>
+<p class="page-actions"><a href="/feed.xml">subscribe by feed</a></p>
 ${body}`,
   });
 }
@@ -87,6 +96,7 @@ export function renderPost(post) {
     ogType: "article",
     published: post.went_live_at,
     modified: lastRevision || post.finalized_at,
+    head: FEED_LINK,
     jsonLd: postJsonLd(post),
     body: `<article>
   <header class="post-header">
