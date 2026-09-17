@@ -214,7 +214,16 @@ export function rangeFigure(state) {
     .map((r) => `<line x1="${PAD_L}" y1="${fmt(Y(r.start))}" x2="${width - PAD_R}" y2="${fmt(Y(r.start))}" stroke="${esc(r.color)}" stroke-opacity="0.28" stroke-dasharray="2 5"/>`)
     .join("");
   const roleLabels = roleRidges
-    .map((r) => ({ ty: Y(r.start) + 3, label: `${r.company} · ${r.title}`.toLowerCase(), color: r.color, id: r.id }))
+    // `label` overrides the caption when "company · title" will not fit the
+    // gutter. The label is right-anchored at PAD_L - 8 and there is nothing to
+    // its left, so anything too long is silently clipped by the viewBox — the
+    // card still carries the full title. range-labels.test.mjs holds the budget.
+    .map((r) => ({
+      ty: Y(r.start) + 3,
+      label: (r.label ?? `${r.company} · ${r.title}`).toLowerCase(),
+      color: r.color,
+      id: r.id,
+    }))
     .sort((a, b) => a.ty - b.ty);
   for (let i = 1; i < roleLabels.length; i++) {
     if (roleLabels[i].ty < roleLabels[i - 1].ty + 13) roleLabels[i].ty = roleLabels[i - 1].ty + 13;

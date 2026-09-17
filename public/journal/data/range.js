@@ -70,16 +70,15 @@ export const skills = [
   { id: 'aigov', name: 'ai governance', fam: 'lead' }
 ];
 export const ridges = [
-  { id: 'auburn', kind: 'role', company: 'Auburn', title: 'Student sysadmin', start: 2003.6, end: 2007.5, color: '#6f7d4a',
-    record: ['Ran the machines in front of the students — accounts, backups, the campus network drops.',
-      'Perl and bash glue for anything that had to happen twice; the habits every later chapter stands on.'],
-    story: 'Student sysadmin. Everything was on the machine in front of you: Perl glue, bash, the campus network. A small footprint with deep grooves.',
-    use: { linux: [1, 3], bash: [1, 2], perl: [0.92, 3], networking: [0.7, 2], onprem: [0.8, 2], mysql: [0.5, 1], php: [0.6, 2], htmlcss: [0.5, 1], c: [0.35, 1], python: [0.2, 1] } },
-  { id: 'temple', kind: 'role', company: 'Temple', title: 'University systems', start: 2007.5, end: 2009.1, color: '#56707d',
-    record: ['Racked, cabled, and virtualized the university’s systems — on-prem at full height.',
-      'The last chapter where the hardware itself was the job.'],
-    story: 'University systems. The last era where racking hardware was the job itself — on-prem at full height, and nearly the last time.',
-    use: { linux: [1, 2], bash: [0.9, 2], perl: [0.45, 1], networking: [0.85, 2], onprem: [1, 3], virtualization: [0.8, 2], mysql: [0.6, 1], php: [0.7, 2] } },
+  // Real, from the résumé: Information Technology Specialist III, Auburn
+  // University, Feb 2005 – Feb 2009. The handoff had this as 'Student sysadmin'
+  // 2003.6–2007.5, which was neither the title nor the span.
+  { id: 'auburn', kind: 'role', company: 'Auburn University', title: 'Information Technology Specialist III', label: 'auburn · it specialist iii', start: 2005.1, end: 2009.1, color: '#6f7d4a',
+    record: ['Head system administrator for the Linux-based servers at Auburn University.',
+      'Operating systems, Oracle servers, and enterprise hardware — maintained and tuned.',
+      'Wrote the monitoring and security-compliance scripts, and kept the patch cadence that closed the vulnerabilities.'],
+    story: 'Head Linux sysadmin at Auburn, run alongside the CS degree. Everything was on the machine in front of you: the servers, the Oracle boxes, the scripts that watched them.',
+    use: { linux: [1, 3], bash: [1, 2], perl: [0.92, 3], networking: [0.7, 2], onprem: [1, 3], mysql: [0.5, 1], php: [0.6, 2], htmlcss: [0.5, 1], c: [0.35, 1], python: [0.2, 1] } },
   { id: 'v1', kind: 'role', company: 'Ventures', title: 'Co-founder · web agency', start: 2009.1, end: 2012.3, color: '#b3703a',
     record: ['First of three ventures founded over nine years, spanning B2B SaaS and consumer products.',
       'Shipped LAMP sites end to end — sales call to deploy — for anyone who would pay.'],
@@ -121,7 +120,7 @@ export const ridges = [
       'Developed the DSP premium platform on OpenTDF, opening 37% net-new growth in company ARR.'],
     story: 'Staff architect. Go, the CLI, the monorepo — a deliberately narrow footprint with tall peaks. Focus over width.',
     use: { go: [0.9, 3], monorepo: [0.8, 2], cli: [0.85, 3], sdk: [0.7, 2], rest: [0.5, 1], kubernetes: [0.4, 1], strategy: [0.5, 1], observability: [0.35, 1] } },
-  { id: 'vr-dir', kind: 'role', company: 'Virtru', title: 'Director → VP of Engineering, Platform', start: 2025.0, end: 2026.65, color: '#16484c',
+  { id: 'vr-dir', kind: 'role', company: 'Virtru', title: 'Director → VP of Engineering, Platform', label: 'virtru · director → vp of eng', start: 2025.0, end: 2026.65, color: '#16484c',
     record: ['Lead the 12-engineer platform organization behind the Data Security Platform and OpenTDF — airgapped and as distributed SaaS.',
       'Led platform readiness for the first major customer release, anchoring delivery for a $17M client against a ~$42M ARR base.',
       'Established OIDC as the platform’s universal identity layer; DPoP and token-exchange flows for cross-platform handoffs.',
@@ -162,7 +161,7 @@ export const ridges = [
 ];
 export const events = [
   { skill: 'perl', year: 2005.5, ridge: 'auburn', label: 'Campus job scheduler in Perl', impact: 1, note: 'Heavily used at Auburn — untouched since 2009.' },
-  { skill: 'onprem', year: 2008.8, ridge: 'temple', label: 'University rack build-out', impact: 2 },
+  { skill: 'onprem', year: 2008.8, ridge: 'auburn', label: 'University rack build-out', impact: 2 },
   { skill: 'onprem', year: 2014.0, ridge: 'v2', label: 'Datacenter exit', impact: 2, note: 'The last on-prem touch point. Dormant since 2014.' },
   { skill: 'microfrontends', year: 2018.3, ridge: 'bbva', label: 'Microfrontends at BBVA', impact: 3 },
   { skill: 'react', year: 2020.85, ridge: 'vr-senior', label: 'Policy web app · $250k', impact: 2 },
