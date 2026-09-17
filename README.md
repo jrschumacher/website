@@ -247,6 +247,21 @@ npm test          # renderers, parsers, the share cards and the sitemap
 npm run deploy
 ```
 
+### The lockfile
+
+`package-lock.json` is committed, so `npm ci` is the install. Regenerate it with:
+
+```sh
+npm install --package-lock-only
+```
+
+Not a plain `npm install`: that records only the optional binaries for the
+machine that ran it, so a lockfile written on linux-x64 installs wrangler with
+no workerd binary anywhere else — silently, with the failure arriving later as a
+missing module. `--package-lock-only` resolves from the registry's metadata
+instead and writes every platform's entry. `test/lockfile.test.mjs` fails if the
+file loses them again.
+
 ## The domain
 
 `aboldnewlook.com` is live and served by this Worker. It is attached with
