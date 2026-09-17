@@ -3,9 +3,12 @@
 # healthy for two weeks because nothing ran `npm test` on push.
 name: test
 
+# push on the default branch, pull_request everywhere else. `push: "**"` plus
+# `pull_request` ran this twice on every commit to an open PR — same commit,
+# same result, twice the queue.
 on:
   push:
-    branches: ["**"]
+    branches: [main]
   pull_request:
 
 jobs:
