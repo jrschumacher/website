@@ -8,13 +8,20 @@ One Cloudflare Worker. Server-rendered HTML, no framework, no build step.
 
 ## Routes
 
-| Route         | What it is                                                   |
-| ------------- | ------------------------------------------------------------ |
-| `/`           | The field record — prose, two figures, case studies, talks    |
-| `/blog`       | Index of live posts, newest first                             |
-| `/blog/:slug` | One post, markdown rendered to HTML                           |
-| `/resume`     | The résumé, assembled from D1 for `DEFAULT_TARGET`            |
-| `/resume.txt` | The same résumé as plain text (the LinkedIn-paste copy)       |
+| Route          | What it is                                                  |
+| -------------- | ----------------------------------------------------------- |
+| `/`            | The field record — prose, two figures, case studies, talks   |
+| `/work`        | Every case study                                            |
+| `/work/:slug`  | One case study, at an address that can be sent to someone    |
+| `/blog`        | Index of live posts, newest first                           |
+| `/blog/:slug`  | One post, markdown rendered to HTML                         |
+| `/talks`       | The deck shelf                                              |
+| `/talks/:slug` | One deck — a page to read, a deck to fly, `?presenter` for the speaker |
+| `/resume`      | The résumé, assembled from D1 for `DEFAULT_TARGET`          |
+| `/resume.md`   | The same résumé as Markdown (the one to parse)              |
+| `/resume.txt`  | The same résumé as plain text (the LinkedIn-paste copy)     |
+| `/llms.txt`    | The site as a map for machines (llmstxt.org)                |
+| `/sitemap.xml` | The same map for crawlers; `robots.txt` points at it        |
 
 Anything else is a 404. Anything that is not `GET`/`HEAD` is a 405.
 
@@ -135,10 +142,13 @@ accomplishments appear and in what order. `/resume` renders one target, named
 in `src/config.js`:
 
 ```js
-export const DEFAULT_TARGET = "principal-security";
+export const DEFAULT_TARGET = "website";
 ```
 
-Change that string to re-point the page.
+Change that string to re-point the page. `website` is the one written for a
+public page rather than for an application: it sets no include filter, so every
+bullet is eligible. The others are tailored to a kind of role and drop whole
+jobs that do not match them.
 
 ## Stylesheets
 
@@ -159,7 +169,12 @@ called by `layout()` and by the homepage's own document — so a new page cannot
 ship without them, and the card is built from the same title and description
 the page already has rather than from a second set of strings that can drift.
 
-The files themselves live in `public/` and are generated, not drawn:
+`/sitemap.xml` is the same idea for crawlers: assembled in
+`src/render/sitemap.js` from the case-study data, the deck registry and the live
+posts in D1, with a `<lastmod>` only where a record actually carries one.
+`robots.txt` points at it.
+
+The image files themselves live in `public/` and are generated, not drawn:
 
 ```
 public/favicon.svg            the mark; the source every raster icon comes from
@@ -195,7 +210,7 @@ assets like any other file in `public/`.
 ```sh
 npm install
 npm run dev
-npm test          # markdown renderer unit tests
+npm test          # renderers, parsers, the share cards and the sitemap
 npm run deploy
 ```
 
@@ -220,9 +235,12 @@ exactly. `www` redirects to the apex in the Worker.
 nameservers and could not be attached at all. That stopped being true when the
 zone moved to Cloudflare and the routes went in.)
 
-## `npm test` is not in CI
+## CI
 
-Cloudflare Workers Builds runs the deploy, and nothing runs `npm test` on push.
-That is worth fixing: a branch can be green in the dashboard while its tests
-fail, which is exactly how three decks referenced by `src/talks/registry.js`
-came to be missing from git without anyone noticing.
+`.github/workflows/test.yml` runs `npm test` and then `npx wrangler deploy
+--dry-run` — on pull requests, and on pushes to `main`. Cloudflare Workers
+Builds still runs the deploy itself, and a build is not a test: a registry
+importing three decks that were never committed looked healthy for two weeks
+because nothing ran the suite on push. The dry run is the other half, because
+`npm test` cannot see an import that only the Workers bundler resolves, which
+is exactly how those decks hid.

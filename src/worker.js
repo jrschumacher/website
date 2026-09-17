@@ -13,7 +13,12 @@ import { handleBlogIndex, handleBlogPost } from "./routes/blog.js";
 import { handleTalksIndex, handleTalk, handlePatternSvg } from "./routes/talks.js";
 import { handleWorkIndex, handleWork } from "./routes/work.js";
 import { handleLlmsTxt } from "./routes/llms.js";
+import { handleSitemap } from "./routes/sitemap.js";
 import { layout } from "./render/layout.js";
+import { SITE_ORIGIN } from "./config.js";
+
+/** The one host this site answers on; www redirects to it. */
+const CANONICAL_HOST = new URL(SITE_ORIGIN).hostname;
 
 function plain(body, status) {
   return new Response(body, {
@@ -66,9 +71,11 @@ export default {
     const url = new URL(request.url);
 
     // One canonical address. www is served only so it does not fail, and it
-    // redirects rather than duplicating every page at a second URL.
-    if (url.hostname === "www.aboldnewlook.com") {
-      url.hostname = "aboldnewlook.com";
+    // redirects rather than duplicating every page at a second URL. The host
+    // comes from SITE_ORIGIN, which is also what every canonical link and share
+    // card is built from: two copies of the site's own address is one too many.
+    if (url.hostname === `www.${CANONICAL_HOST}`) {
+      url.hostname = CANONICAL_HOST;
       return Response.redirect(url.toString(), 301);
     }
 
@@ -86,6 +93,8 @@ export default {
         response = await handleResumeText(request, env);
       } else if (path === "/llms.txt") {
         response = await handleLlmsTxt(request, env);
+      } else if (path === "/sitemap.xml") {
+        response = await handleSitemap(request, env);
       } else if (path === "/work") {
         response = await handleWorkIndex(request, env);
       } else if (path.startsWith("/work/")) {

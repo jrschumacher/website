@@ -10,7 +10,10 @@
 // The links are absolute. A crawler that has this file has usually lost the
 // base it fetched it from.
 
-const BASE = "https://aboldnewlook.com";
+import { SITE_ORIGIN } from "../config.js";
+
+// The site's one address, from the one place that knows it.
+const BASE = SITE_ORIGIN;
 
 /** Collapse to one line: a description here is metadata, not prose. */
 function oneLine(text, limit = 220) {

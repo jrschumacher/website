@@ -11,7 +11,7 @@ const LIVE = "went_live_at IS NOT NULL AND archived = 0";
 export async function listPosts(DB) {
   const [posts, tags] = await DB.batch([
     DB.prepare(
-      `SELECT id, slug, title, summary, went_live_at, finalized_at
+      `SELECT id, slug, title, summary, went_live_at, finalized_at, updated_at
          FROM posts
         WHERE ${LIVE}
         ORDER BY went_live_at DESC, id DESC`,

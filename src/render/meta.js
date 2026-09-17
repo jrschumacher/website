@@ -31,7 +31,10 @@ export const SHARE_IMAGE_SIZE = { width: 1200, height: 630 };
  *   favicon.svg        the tab, at whatever size the browser feels like, and
  *                      the only one that stays sharp on a 4K display
  *   favicon.ico        the browsers and bookmark managers that never learned
- *                      to read an SVG; 16/32/48 packed into one file
+ *                      to read an SVG; 16/32/48 packed into one file, and the
+ *                      `sizes` attribute says so — a browser chooses by that
+ *                      attribute, and one that under-declares what it holds
+ *                      gets passed over and then upscaled from 32
  *   apple-touch-icon   iOS home screen, which ignores everything else and
  *                      wants exactly 180×180 with no transparency
  *   site.webmanifest   Android, and the install prompt: name, colours, 192/512
@@ -40,7 +43,7 @@ export const SHARE_IMAGE_SIZE = { width: 1200, height: 630 };
  * understands SVG to prefer it over the .ico, instead of picking the .ico
  * because it advertises concrete pixel sizes and the SVG does not.
  */
-export const SITE_ICONS = `<link rel="icon" href="/favicon.ico" sizes="32x32">
+export const SITE_ICONS = `<link rel="icon" href="/favicon.ico" sizes="16x16 32x32 48x48">
 <link rel="icon" href="/favicon.svg" type="image/svg+xml" sizes="any">
 <link rel="apple-touch-icon" href="/apple-touch-icon.png">
 <link rel="manifest" href="/site.webmanifest">
