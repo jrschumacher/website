@@ -1,0 +1,612 @@
+#!/usr/bin/env node
+// make-images — the icons and the share cards, drawn by the site itself.
+//
+//   bin/make-images           # everything, into public/
+//   bin/make-images --icons   # only the icons
+//   bin/make-images --cards   # only the share cards
+//   bin/make-images --check   # render nothing; report what is missing
+//
+// Two kinds of image come out of here, and neither is drawn in an editor:
+//
+//   the icons     rasterised from public/favicon.svg, which is the one source.
+//                 16/32/48 packed into favicon.ico for the browsers that cannot
+//                 read an SVG, 180 for iOS, 192/512 for Android, and one
+//                 maskable 512 for the Android launcher's cookie-cutter.
+//
+//   the cards     public/og/*.png — 1200×630, the picture a link to this site
+//                 unfurls into. Laid out in HTML, in the journal's own palette
+//                 and type, because a share card drawn somewhere else stops
+//                 looking like the site the first time the site changes.
+//
+// The renderer is Chrome, headless, which every machine that can develop this
+// site already has. The alternative was a rasteriser dependency in a repo whose
+// whole point is that `wrangler deploy` is the entire pipeline.
+//
+// The output is committed. Nothing at request time reads this script: the
+// Worker serves the PNGs as static assets, and a deploy from a machine with no
+// Chrome and no network still ships the same images.
+//
+// Fonts: EB Garamond and IBM Plex Mono are fetched from Google Fonts on first
+// run and cached in the system temp directory. They are inlined into the card
+// as data URIs rather than linked, because a screenshot does not wait politely
+// for a webfont — a linked font is a race the card loses about a third of the
+// time, silently, in the fallback serif.
+
+import { existsSync, mkdirSync, readFileSync, writeFileSync, statSync } from "node:fs";
+import { spawnSync } from "node:child_process";
+import zlib from "node:zlib";
+import { tmpdir } from "node:os";
+import path from "node:path";
+import { fileURLToPath } from "node:url";
+
+const ROOT = path.resolve(path.dirname(fileURLToPath(import.meta.url)), "..");
+const PUBLIC = path.join(ROOT, "public");
+const OG_DIR = path.join(PUBLIC, "og");
+const WORK = path.join(tmpdir(), "aboldnewlook-images");
+
+// The journal's tokens (src/render/journal-css.js), the few this file needs.
+const PAPER = "#f1ead9";
+const PANEL = "#ede4cf";
+const INK = "#2a241b";
+const BODY = "#3a3226";
+const BODY_SOFT = "#4a4133";
+const MUTED = "#7b5f3f";
+const FADED = "#8a7a5f";
+const RULE = "#cfc3a8";
+const ACCENT = "#b03b1e";
+
+const CARD = { width: 1200, height: 630 };
+
+/** The masthead's right-hand stamp — the same on every card, as on the site. */
+const STAMP = "FIELD NOTES · 2003–2026";
+
+/**
+ * The cards, one per section of the site.
+ *
+ * The copy mirrors each page's own lede rather than inventing a second voice
+ * for the same page. It is kept here rather than imported because the ledes
+ * live inside the renderers' markup; if that ever changes, import them instead
+ * of retyping them — a card that describes a page the page no longer is, is
+ * worse than a card with no words on it.
+ */
+const CARDS = [
+  {
+    file: "default.png",
+    kicker: "THE RECORD",
+    title: "The field record",
+    lede: "Identity, keys, and the platforms underneath. Twenty-three years of work, drawn as terrain.",
+    slug: "aboldnewlook.com",
+  },
+  {
+    file: "work.png",
+    kicker: "SECTION IV · CASE STUDIES",
+    title: "Case studies",
+    lede: "Work I can describe in public: what the problem was, what was built, and what it changed.",
+    slug: "aboldnewlook.com/work",
+  },
+  {
+    file: "blog.png",
+    kicker: "SECTION V · FIELD NOTES",
+    title: "Blog",
+    lede: "Notes on building things, and on working with the machines that help build them.",
+    slug: "aboldnewlook.com/blog",
+  },
+  {
+    file: "talks.png",
+    kicker: "SECTION VI · TRANSPARENCIES",
+    title: "Talks",
+    lede: "Decks I have given, written as pages first. Each one reads top to bottom.",
+    slug: "aboldnewlook.com/talks",
+  },
+  {
+    file: "resume.png",
+    kicker: "THE DOCUMENT",
+    title: "Résumé",
+    lede: "Twenty-three years of platform, identity and developer experience — the record as one page.",
+    slug: "aboldnewlook.com/resume",
+  },
+];
+
+/** Every PNG this script is responsible for, and how big it is. */
+const ICONS = [
+  { file: "apple-touch-icon.png", size: 180 },
+  { file: "icon-192.png", size: 192 },
+  { file: "icon-512.png", size: 512 },
+  { file: "icon-maskable-512.png", size: 512, maskable: true },
+];
+
+/** The sizes packed into favicon.ico, smallest first. */
+const ICO_SIZES = [16, 32, 48];
+
+// --- Chrome ------------------------------------------------------------------
+
+/**
+ * Find a Chrome to render with.
+ *
+ * `CHROME` wins if it is set. Otherwise the usual suspects, including the
+ * Playwright-managed build, which is what a Claude Code container has.
+ */
+function findChrome() {
+  if (process.env.CHROME) return process.env.CHROME;
+
+  const browsers = process.env.PLAYWRIGHT_BROWSERS_PATH || "/opt/pw-browsers";
+  const candidates = [
+    `${browsers}/chromium-1194/chrome-linux/chrome`,
+    "/Applications/Google Chrome.app/Contents/MacOS/Google Chrome",
+    "/Applications/Chromium.app/Contents/MacOS/Chromium",
+    "/usr/bin/google-chrome",
+    "/usr/bin/chromium",
+    "/usr/bin/chromium-browser",
+  ];
+  for (const c of candidates) if (existsSync(c)) return c;
+
+  // Anything Playwright installed under a version this file does not know.
+  const glob = spawnSync("sh", ["-c", `ls -d ${browsers}/chromium-*/chrome-linux/chrome 2>/dev/null | head -1`], {
+    encoding: "utf8",
+  });
+  const found = glob.stdout.trim();
+  if (found) return found;
+
+  const which = spawnSync("sh", ["-c", "command -v google-chrome chromium chromium-browser 2>/dev/null | head -1"], {
+    encoding: "utf8",
+  });
+  return which.stdout.trim() || null;
+}
+
+/**
+ * How much shorter than its window headless Chrome's viewport is.
+ *
+ * It is not zero and it is not documented: this build renders into a viewport
+ * 87px shorter than the `--window-size` it is given, while the screenshot comes
+ * out at the full window size. The bottom 87px of every image is therefore
+ * whatever the page background is, and nothing warns you — the card looks
+ * right, the frame is just missing its bottom edge.
+ *
+ * So ask the page how tall it actually got. `--dump-dom` runs the scripts and
+ * prints the DOM, which is the cheapest way to get a number back out of a
+ * browser with no driver attached. Measured once per run; 0 on a build that
+ * does not do this.
+ */
+function viewportOffset(chrome) {
+  const probeHeight = 800;
+  const probe = path.join(WORK, "probe.html");
+  writeFileSync(
+    probe,
+    `<html><body><p id="o"></p><script>document.getElementById("o").textContent="VP" + innerHeight;</script></body></html>`,
+  );
+  const out = spawnSync(
+    chrome,
+    [
+      "--headless",
+      "--no-sandbox",
+      "--disable-gpu",
+      "--disable-dev-shm-usage",
+      "--virtual-time-budget=500",
+      `--window-size=1200,${probeHeight}`,
+      "--dump-dom",
+      `file://${probe}`,
+    ],
+    { encoding: "utf8" },
+  );
+  const seen = /VP(\d+)/.exec(out.stdout ?? "");
+  if (!seen) return 0;
+  return Math.max(0, probeHeight - Number(seen[1]));
+}
+
+/**
+ * Screenshot one HTML string at an exact size.
+ *
+ * The window is asked for `height + offset` so the viewport is `height`, and
+ * the extra rows are cut off the bottom of the PNG afterwards. Chrome will not
+ * screenshot a region, and there is no driver here to ask it to; cropping the
+ * file is smaller than the dependency that would.
+ */
+function shoot(chrome, html, out, width, height, offset) {
+  mkdirSync(WORK, { recursive: true });
+  const page = path.join(WORK, "page.html");
+  writeFileSync(page, html);
+
+  const result = spawnSync(
+    chrome,
+    [
+      "--headless",
+      "--no-sandbox",
+      "--disable-gpu",
+      "--disable-dev-shm-usage",
+      "--hide-scrollbars",
+      "--disable-lcd-text",
+      "--force-device-scale-factor=1",
+      "--virtual-time-budget=2000",
+      `--window-size=${width},${height + offset}`,
+      `--screenshot=${out}`,
+      `file://${page}`,
+    ],
+    { encoding: "utf8" },
+  );
+
+  if (!existsSync(out)) {
+    throw new Error(
+      `chrome wrote nothing for ${path.relative(ROOT, out)}\n${result.stderr ?? ""}`,
+    );
+  }
+  if (offset > 0) writeFileSync(out, cropRows(readFileSync(out), height));
+}
+
+// --- PNG ---------------------------------------------------------------------
+
+const PNG_MAGIC = Buffer.from([0x89, 0x50, 0x4e, 0x47, 0x0d, 0x0a, 0x1a, 0x0a]);
+
+/** The CRC-32 every PNG chunk ends with (PNG spec, annex D). */
+const CRC_TABLE = (() => {
+  const table = new Int32Array(256);
+  for (let n = 0; n < 256; n++) {
+    let c = n;
+    for (let k = 0; k < 8; k++) c = c & 1 ? 0xedb88320 ^ (c >>> 1) : c >>> 1;
+    table[n] = c;
+  }
+  return table;
+})();
+
+function crc32(buf) {
+  let c = -1;
+  for (const byte of buf) c = CRC_TABLE[(c ^ byte) & 0xff] ^ (c >>> 8);
+  return (c ^ -1) >>> 0;
+}
+
+function chunk(type, data) {
+  const head = Buffer.alloc(8);
+  head.writeUInt32BE(data.length, 0);
+  head.write(type, 4, "ascii");
+  const crc = Buffer.alloc(4);
+  crc.writeUInt32BE(crc32(Buffer.concat([head.subarray(4), data])), 0);
+  return Buffer.concat([head, data, crc]);
+}
+
+/**
+ * Keep the top `rows` scanlines of a PNG and drop the rest.
+ *
+ * Cheap because it is a prefix: PNG filters only ever reference the row above,
+ * so the scanlines that are kept decode exactly as they did before and no
+ * pixel is touched. Only the ones being thrown away would have needed
+ * rewriting. Chrome writes 8-bit non-interlaced RGB; anything else is not
+ * something this script produced, so it says so rather than guessing.
+ */
+function cropRows(png, rows) {
+  if (!png.subarray(0, 8).equals(PNG_MAGIC)) throw new Error("not a PNG");
+
+  let header = null;
+  const pixels = [];
+  for (let at = 8; at + 8 <= png.length; ) {
+    const length = png.readUInt32BE(at);
+    const type = png.toString("ascii", at + 4, at + 8);
+    const data = png.subarray(at + 8, at + 8 + length);
+    if (type === "IHDR") header = Buffer.from(data);
+    else if (type === "IDAT") pixels.push(data);
+    at += 12 + length;
+  }
+  if (!header) throw new Error("PNG with no IHDR");
+
+  const width = header.readUInt32BE(0);
+  const height = header.readUInt32BE(4);
+  const depth = header[8];
+  const colour = header[9];
+  const interlaced = header[12];
+  if (rows >= height) return png;
+
+  const channels = { 0: 1, 2: 3, 4: 2, 6: 4 }[colour];
+  if (depth !== 8 || interlaced || !channels) {
+    throw new Error(`unexpected PNG: depth ${depth}, colour type ${colour}`);
+  }
+
+  const stride = 1 + width * channels;
+  const raw = zlib.inflateSync(Buffer.concat(pixels));
+  header.writeUInt32BE(rows, 4);
+
+  return Buffer.concat([
+    PNG_MAGIC,
+    chunk("IHDR", header),
+    chunk("IDAT", zlib.deflateSync(raw.subarray(0, stride * rows), { level: 9 })),
+    chunk("IEND", Buffer.alloc(0)),
+  ]);
+}
+
+// --- fonts -------------------------------------------------------------------
+
+/** Chrome's own UA, so Google Fonts serves woff2 rather than the 2011 formats. */
+const UA =
+  "Mozilla/5.0 (X11; Linux x86_64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/126.0.0.0 Safari/537.36";
+
+const FONT_URL =
+  "https://fonts.googleapis.com/css2?family=EB+Garamond:wght@400;500;600&family=IBM+Plex+Mono:wght@400;500&display=swap";
+
+/**
+ * The two site faces as one stylesheet with the font files inlined.
+ *
+ * Only the latin blocks are kept. The full reply carries Cyrillic, Greek and
+ * Vietnamese subsets too, and a card that says "Case studies" has no use for
+ * 300KB of Cyrillic.
+ */
+async function fontCss() {
+  const cached = path.join(WORK, "fonts.css");
+  if (existsSync(cached)) return readFileSync(cached, "utf8");
+
+  const res = await fetch(FONT_URL, { headers: { "user-agent": UA } });
+  if (!res.ok) throw new Error(`google fonts: HTTP ${res.status}`);
+  const css = await res.text();
+
+  const blocks = [...css.matchAll(/\/\* (\S+) \*\/\s*(@font-face \{[^}]*\})/g)]
+    .filter(([, subset]) => subset === "latin" || subset === "latin-ext")
+    .map(([, , block]) => block);
+  if (!blocks.length) throw new Error("google fonts: no latin faces in the reply");
+
+  const inlined = [];
+  for (const block of blocks) {
+    const url = /url\((https:\/\/[^)]+)\)/.exec(block)?.[1];
+    if (!url) continue;
+    const font = await fetch(url, { headers: { "user-agent": UA } });
+    if (!font.ok) throw new Error(`google fonts: HTTP ${font.status} for ${url}`);
+    const data = Buffer.from(await font.arrayBuffer()).toString("base64");
+    inlined.push(block.replace(url, `data:font/woff2;base64,${data}`));
+  }
+
+  const sheet = inlined.join("\n");
+  mkdirSync(WORK, { recursive: true });
+  writeFileSync(cached, sheet);
+  return sheet;
+}
+
+// --- the cards ---------------------------------------------------------------
+
+function escapeHtml(value) {
+  return String(value ?? "")
+    .replace(/&/g, "&amp;")
+    .replace(/</g, "&lt;")
+    .replace(/>/g, "&gt;");
+}
+
+/**
+ * public/favicon.svg, inlined, so the mark on the card is the mark in the tab.
+ *
+ * Comments and any XML declaration come out because this is going inside
+ * another document; the size is left to the CSS of whoever is placing it.
+ */
+function markSvg() {
+  return readFileSync(path.join(PUBLIC, "favicon.svg"), "utf8")
+    .replace(/<\?xml[^>]*\?>/, "")
+    .replace(/<!--[\s\S]*?-->/g, "")
+    .trim();
+}
+
+/**
+ * One share card.
+ *
+ * The layout is the site's masthead: mark and wordmark left, slug right, a
+ * 2px rule under them, the title set large in EB Garamond, the short rule the
+ * whole site uses under a title, the lede, and the address at the foot.
+ */
+function cardHtml(spec, fonts) {
+  return `<!doctype html>
+<html><head><meta charset="utf-8"><style>
+${fonts}
+html, body { margin: 0; padding: 0; }
+body {
+  background: ${PAPER};
+  color: ${INK};
+  font-family: "EB Garamond", Georgia, serif;
+}
+/*
+ * The card is a box of its own exact size, and the frame is positioned against
+ * that box rather than against the viewport. Headless Chrome's viewport is not
+ * quite the window size it was asked for, and it captures the full page height
+ * when the page is taller — so a frame pinned to the viewport lands short of
+ * the bottom of an image that is nonetheless 1200×630.
+ */
+.card { position: relative; width: ${CARD.width}px; height: ${CARD.height}px; overflow: hidden; }
+.frame {
+  position: absolute; inset: 28px;
+  background: ${PANEL};
+  border: 1px solid ${INK};
+  box-shadow: inset 0 0 0 5px ${PAPER}, inset 0 0 0 6px ${INK};
+  padding: 46px 56px 40px;
+  display: flex; flex-direction: column;
+}
+.masthead {
+  display: flex; justify-content: space-between; align-items: center;
+  border-bottom: 2px solid ${INK};
+  padding-bottom: 18px;
+}
+.wordmark { display: flex; align-items: center; gap: 18px; }
+.wordmark svg { display: block; width: 64px; height: 64px; }
+.wordmark span { font-size: 38px; font-weight: 500; letter-spacing: .01em; }
+.slug {
+  font-family: "IBM Plex Mono", monospace;
+  font-size: 15px; letter-spacing: .18em; color: ${MUTED};
+}
+.body { flex: 1; display: flex; flex-direction: column; justify-content: center; }
+.kicker {
+  font-family: "IBM Plex Mono", monospace;
+  font-size: 15px; letter-spacing: .22em; color: ${FADED};
+}
+h1 {
+  margin: 20px 0 0;
+  font-size: 86px; font-weight: 500; line-height: 1.06;
+  letter-spacing: -0.005em;
+  text-wrap: balance;
+}
+.rule-short {
+  width: 76px; height: 2px; margin: 26px 0 0;
+  border-top: 1px solid ${INK}; border-bottom: 1px solid ${INK};
+}
+.lede {
+  margin: 26px 0 0; max-width: 880px;
+  font-size: 30px; line-height: 1.42; color: ${BODY_SOFT};
+  text-wrap: pretty;
+}
+.foot {
+  display: flex; justify-content: space-between; align-items: baseline;
+  border-top: 1px solid ${RULE};
+  padding-top: 16px;
+  font-family: "IBM Plex Mono", monospace;
+  font-size: 16px; letter-spacing: .12em; color: ${BODY};
+}
+.foot .who { color: ${ACCENT}; }
+</style></head>
+<body>
+<div class="card">
+<div class="frame">
+  <div class="masthead">
+    <div class="wordmark">${markSvg()}<span>aboldnewlook</span></div>
+    <div class="slug">${escapeHtml(STAMP)}</div>
+  </div>
+  <div class="body">
+    <div class="kicker">${escapeHtml(spec.kicker)}</div>
+    <h1>${escapeHtml(spec.title)}</h1>
+    <div class="rule-short"></div>
+    <p class="lede">${escapeHtml(spec.lede)}</p>
+  </div>
+  <div class="foot">
+    <span>${escapeHtml(spec.slug)}</span>
+    <span class="who">Ryan Schumacher</span>
+  </div>
+</div>
+</div>
+</body></html>`;
+}
+
+// --- the icons ---------------------------------------------------------------
+
+/**
+ * One icon, at one size.
+ *
+ * `maskable` is the Android launcher's version: the same mark, shrunk into the
+ * middle 64% of the canvas, because the launcher crops every icon to whatever
+ * shape it feels like — a circle, a squircle, a rounded square — and anything
+ * outside that safe zone is what it crops off. Without it the launcher eats
+ * the frame and half the red rule.
+ */
+function iconHtml(size, { maskable = false } = {}) {
+  const inset = maskable ? Math.round(size * 0.18) : 0;
+  return `<!doctype html>
+<html><head><meta charset="utf-8"><style>
+html, body { margin: 0; padding: 0; background: ${PAPER}; }
+.icon { position: relative; width: ${size}px; height: ${size}px; overflow: hidden; }
+svg { display: block; position: absolute; inset: ${inset}px; width: ${size - inset * 2}px; height: ${size - inset * 2}px; }
+</style></head><body><div class="icon">${markSvg()}</div></body></html>`;
+}
+
+/**
+ * Pack PNGs into an .ico.
+ *
+ * An ICO is a six-byte header, one sixteen-byte directory entry per image, and
+ * then the images. Since Vista the images may be PNGs rather than BMPs, which
+ * is the only reason this is fifteen lines instead of an encoder: the PNGs
+ * Chrome already wrote go in whole. A size of 256 is written as 0; nothing here
+ * is 256, but the rule is the format's, not this file's.
+ */
+function icoFrom(pngs) {
+  const header = Buffer.alloc(6);
+  header.writeUInt16LE(0, 0); // reserved
+  header.writeUInt16LE(1, 2); // 1 = icon
+  header.writeUInt16LE(pngs.length, 4);
+
+  const entries = [];
+  let offset = 6 + pngs.length * 16;
+  for (const { size, data } of pngs) {
+    const entry = Buffer.alloc(16);
+    entry.writeUInt8(size >= 256 ? 0 : size, 0);
+    entry.writeUInt8(size >= 256 ? 0 : size, 1);
+    entry.writeUInt8(0, 2); // palette size: not paletted
+    entry.writeUInt8(0, 3); // reserved
+    entry.writeUInt16LE(1, 4); // colour planes
+    entry.writeUInt16LE(32, 6); // bits per pixel
+    entry.writeUInt32LE(data.length, 8);
+    entry.writeUInt32LE(offset, 12);
+    offset += data.length;
+    entries.push(entry);
+  }
+
+  return Buffer.concat([header, ...entries, ...pngs.map((p) => p.data)]);
+}
+
+// --- the run -----------------------------------------------------------------
+
+function report(file) {
+  const rel = path.relative(ROOT, file);
+  const { size } = statSync(file);
+  console.log(`  ${rel.padEnd(34)} ${(size / 1024).toFixed(1)} KB`);
+}
+
+/** --check: every file the pages link to, and whether it is actually there. */
+function check() {
+  const expected = [
+    path.join(PUBLIC, "favicon.svg"),
+    path.join(PUBLIC, "favicon.ico"),
+    path.join(PUBLIC, "site.webmanifest"),
+    ...ICONS.map((i) => path.join(PUBLIC, i.file)),
+    ...CARDS.map((c) => path.join(OG_DIR, c.file)),
+  ];
+  const missing = expected.filter((f) => !existsSync(f) || statSync(f).size === 0);
+  for (const f of expected) {
+    console.log(`  ${missing.includes(f) ? "MISSING" : "ok     "}  ${path.relative(ROOT, f)}`);
+  }
+  if (missing.length) {
+    console.error(`\n${missing.length} missing. Run bin/make-images.`);
+    process.exit(1);
+  }
+}
+
+async function main() {
+  const args = new Set(process.argv.slice(2));
+  if (args.has("--help") || args.has("-h")) {
+    console.log(readFileSync(fileURLToPath(import.meta.url), "utf8").split("\n\n")[0]);
+    return;
+  }
+  if (args.has("--check")) return check();
+
+  const only = args.has("--icons") || args.has("--cards");
+  const doIcons = !only || args.has("--icons");
+  const doCards = !only || args.has("--cards");
+
+  const chrome = findChrome();
+  if (!chrome) {
+    console.error(
+      "No Chrome found. Set CHROME=/path/to/chrome, or install Google Chrome or Chromium.",
+    );
+    process.exit(1);
+  }
+  console.log(`chrome: ${chrome}`);
+  mkdirSync(WORK, { recursive: true });
+  const offset = viewportOffset(chrome);
+
+  if (doIcons) {
+    console.log("icons:");
+    for (const icon of ICONS) {
+      const out = path.join(PUBLIC, icon.file);
+      shoot(chrome, iconHtml(icon.size, icon), out, icon.size, icon.size, offset);
+      report(out);
+    }
+
+    const packed = [];
+    for (const size of ICO_SIZES) {
+      const tmp = path.join(WORK, `ico-${size}.png`);
+      shoot(chrome, iconHtml(size), tmp, size, size, offset);
+      packed.push({ size, data: readFileSync(tmp) });
+    }
+    const ico = path.join(PUBLIC, "favicon.ico");
+    writeFileSync(ico, icoFrom(packed));
+    report(ico);
+  }
+
+  if (doCards) {
+    console.log("share cards:");
+    const fonts = await fontCss();
+    mkdirSync(OG_DIR, { recursive: true });
+    for (const spec of CARDS) {
+      const out = path.join(OG_DIR, spec.file);
+      shoot(chrome, cardHtml(spec, fonts), out, CARD.width, CARD.height, offset);
+      report(out);
+    }
+  }
+}
+
+await main();

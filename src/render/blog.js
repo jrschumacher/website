@@ -4,6 +4,7 @@
 import { escapeHtml, formatDate, isoDate } from "../format.js";
 import { renderMarkdown } from "../blog/markdown.js";
 import { layout } from "./layout.js";
+import { postJsonLd } from "./meta.js";
 
 const e = escapeHtml;
 
@@ -26,6 +27,8 @@ export function renderBlogIndex(posts) {
     title: "Blog — Ryan Schumacher",
     description: "Writing by Ryan Schumacher.",
     current: "blog",
+    path: "/blog",
+    image: "/og/blog.png",
     body: `<h1 class="page-title">Blog</h1>
 <p class="page-lede">Notes on building things, and on working with the machines that help build them.</p>
 ${body}`,
@@ -71,10 +74,20 @@ export function renderPost(post) {
     ? `<p class="living-note">This is a living post — it is still being revised. Changes worth knowing about are listed at the end.</p>`
     : "";
 
+  // A living post's latest revision is the honest modified date; a finished one
+  // has finalized_at and nothing after it.
+  const lastRevision = post.revisions?.length ? post.revisions[0].created_at : null;
+
   return layout({
     title: `${post.title} — Ryan Schumacher`,
     description: post.summary || undefined,
     current: "blog",
+    path: `/blog/${encodeURIComponent(post.slug)}`,
+    image: "/og/blog.png",
+    ogType: "article",
+    published: post.went_live_at,
+    modified: lastRevision || post.finalized_at,
+    jsonLd: postJsonLd(post),
     body: `<article>
   <header class="post-header">
     <h1 class="page-title">${e(post.title)}</h1>

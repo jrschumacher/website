@@ -10,6 +10,7 @@ import { escapeHtml } from "../format.js";
 import { caseStudyArticle } from "./case-study.js";
 import { JOURNAL_STYLESHEET, talkStackRules } from "./journal-css.js";
 import { NAV } from "./layout.js";
+import { shareHead, personJsonLd } from "./meta.js";
 import { sections, caseStudies, notes, contact } from "../../public/journal/data/site.js";
 import { rangeFigure, rangeAside, rangeScaleNote } from "../../public/journal/figures/range.js";
 import {
@@ -22,6 +23,15 @@ import {
 } from "../../public/journal/figures/growth.js";
 
 const e = escapeHtml;
+
+/**
+ * The page's own title and description, hoisted out of the document because the
+ * share card needs the same two sentences the <head> does — a card that says
+ * something other than the page is worse than a card with no words in it.
+ */
+const TITLE = "aboldnewlook — the field record of Ryan Schumacher";
+const DESCRIPTION =
+  "The field record of Ryan Schumacher — identity, keys, and the platforms underneath. Twenty-three years of work, drawn as terrain.";
 
 /** Shown when D1 cannot be reached; the design's own line, and still true. */
 const NOW_FALLBACK = "now — director of platform, virtru · remote";
@@ -340,8 +350,20 @@ export function renderJournal({
 <head>
 <meta charset="utf-8">
 <meta name="viewport" content="width=device-width, initial-scale=1">
-<title>aboldnewlook — the field record of Ryan Schumacher</title>
-<meta name="description" content="The field record of Ryan Schumacher — identity, keys, and the platforms underneath. Twenty-three years of work, drawn as terrain.">
+<title>${TITLE}</title>
+<meta name="description" content="${e(DESCRIPTION)}">
+${shareHead({
+  title: TITLE,
+  description: DESCRIPTION,
+  path: "/",
+  imageAlt: "aboldnewlook — the field record of Ryan Schumacher",
+  // The same two facts the page below renders, including their fallbacks: a
+  // card and a page that disagree are a bug a reader cannot see.
+  jsonLd: personJsonLd({
+    contact: contactRows.length ? contactRows : contact,
+    now: now ?? NOW_FALLBACK,
+  }),
+})}
 <link rel="preconnect" href="https://fonts.googleapis.com">
 <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin="anonymous">
 <link href="https://fonts.googleapis.com/css2?family=EB+Garamond:ital,wght@0,400;0,500;0,600;1,400&amp;family=IBM+Plex+Mono:wght@400;500&amp;display=swap" rel="stylesheet">

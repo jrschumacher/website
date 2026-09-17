@@ -149,6 +149,8 @@ export function renderHtml(resume) {
     title: resume.name || "Résumé",
     description: resume.headline || undefined,
     current: "resume",
+    path: "/resume",
+    image: "/og/resume.png",
     stylesheet: RESUME_STYLESHEET,
     // The same résumé, for anything that would rather parse than render.
     head: `<link rel="alternate" type="text/markdown" href="/resume.md" title="Résumé (Markdown)">`,

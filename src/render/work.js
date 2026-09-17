@@ -33,6 +33,8 @@ export function renderWorkIndex(studies) {
     title: "Case studies — Ryan Schumacher",
     description: "Case studies: platform, growth and the work behind them.",
     current: "work",
+    path: "/work",
+    image: "/og/work.png",
     stylesheet: WORK_STYLESHEET,
     wide: true,
     body: `<h1 class="page-title">Case studies</h1>
@@ -51,6 +53,9 @@ export function renderWorkPage(cs) {
     title: `${cs.title} — Ryan Schumacher`,
     description: cs.story,
     current: "work",
+    path: `/work/${encodeURIComponent(cs.slug)}`,
+    image: "/og/work.png",
+    ogType: "article",
     stylesheet: WORK_STYLESHEET,
     wide: true,
     body: `<div class="cs-list cs-solo">${caseStudyArticle(cs, { titleTag: "h1" })}</div>

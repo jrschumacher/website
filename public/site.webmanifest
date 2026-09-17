@@ -1,0 +1,14 @@
+{
+  "name": "aboldnewlook — the field record of Ryan Schumacher",
+  "short_name": "aboldnewlook",
+  "description": "The field record of Ryan Schumacher — identity, keys, and the platforms underneath.",
+  "start_url": "/",
+  "background_color": "#f1ead9",
+  "theme_color": "#f1ead9",
+  "icons": [
+    { "src": "/favicon.svg", "sizes": "any", "type": "image/svg+xml" },
+    { "src": "/icon-192.png", "sizes": "192x192", "type": "image/png" },
+    { "src": "/icon-512.png", "sizes": "512x512", "type": "image/png" },
+    { "src": "/icon-maskable-512.png", "sizes": "512x512", "type": "image/png", "purpose": "maskable" }
+  ]
+}

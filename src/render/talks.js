@@ -21,6 +21,7 @@
 
 import { escapeHtml, formatDate, isoDate } from "../format.js";
 import { layout } from "./layout.js";
+import { SITE_ICONS } from "./meta.js";
 import { TALKS_STYLESHEET } from "./css.js";
 import { DECK_CSS } from "./deck-css.js";
 
@@ -48,6 +49,8 @@ export function renderTalksIndex(decks) {
     title: "Talks — Ryan Schumacher",
     description: "Talks and slide decks by Ryan Schumacher.",
     current: "talks",
+    path: "/talks",
+    image: "/og/talks.png",
     stylesheet: TALKS_STYLESHEET,
     wide: true,
     body: `<h1 class="page-title">Talks</h1>
@@ -116,7 +119,7 @@ function emptyState() {
  * @param {{ slug: string, meta: object, theme: string|null, slides: object[] }} deck
  */
 export function renderDeckPage(deck) {
-  const { meta, theme, slides } = deck;
+  const { slug, meta, theme, slides } = deck;
   // Stylesheets and font links belong in <head>: emitted in <body> they cause a
   // flash of the site's light theme before a dark deck paints, which on a
   // projector is exactly the wrong first impression.
@@ -136,6 +139,10 @@ export function renderDeckPage(deck) {
     title: `${meta.title} — Ryan Schumacher`,
     description: meta.summary || undefined,
     current: "talks",
+    path: `/talks/${encodeURIComponent(slug)}`,
+    image: "/og/talks.png",
+    ogType: "article",
+    published: meta.date,
     stylesheet: TALKS_STYLESHEET,
     head,
     // The deck theme in `head` sets its own families and wins inside .deck. The
@@ -185,6 +192,14 @@ function slideCardInner(slide) {
   const kicker = slide.kicker ? `<span class="kicker">${e(slide.kicker)}</span>` : "";
   return `${kicker}<div class="slide-body">${slide.html}</div>`;
 }
+
+/**
+ * The presenter view is the speaker's second screen, not a page: it is the same
+ * deck with the notes and a timer, at the same address with `?presenter`. It
+ * gets the icons so the tab is recognisable among the other twenty a speaker
+ * has open, and a noindex so a crawler files the deck rather than the notes.
+ */
+const PRESENTER_META = `<meta name="robots" content="noindex">\n${SITE_ICONS}`;
 
 /**
  * The presenter view: `/talks/<slug>?presenter`.
@@ -245,6 +260,7 @@ export function renderPresenterPage(deck) {
 <meta charset="utf-8">
 <meta name="viewport" content="width=device-width, initial-scale=1">
 <title>${e(meta.title)} — presenter notes</title>
+${PRESENTER_META}
 ${head}
 </head>
 <body class="presenter" data-slug="${e(slug)}">
