@@ -10,9 +10,14 @@
 // maps below, which are what actually draws the peaks. Wiring the figures to
 // real data means a skills-per-role table first.
 //
-// Divergence from the handoff bundle: the vr-dir ridge's title and story were
-// updated for the Jan 2026 and Aug 2026 promotions, and the auburn ridge was
-// corrected to the real role. Every other number is the handoff's.
+// Divergence from the handoff bundle: every role ridge from 2003 to 2019 has
+// been rebuilt from the record — three résumés (2007, ~2015, current), the
+// LinkedIn history and Ryan directly — and the vr-dir ridge relabelled for the
+// Jan 2026 and Aug 2026 promotions. The handoff's invented ridges are gone: a
+// university job at Temple that never happened, and a web-agency-then-startup-
+// then-consultancy decade that was really one company with two spin-offs. The
+// skill columns, the geometry and the Virtru-era numbers are still the
+// handoff's.
 export const fams = [
   { id: 'sys',  name: 'systems & ops' },
   { id: 'lang', name: 'languages' },
@@ -70,17 +75,23 @@ export const skills = [
   { id: 'aigov', name: 'ai governance', fam: 'lead' }
 ];
 export const ridges = [
-  // Freelance, Apr 2003 – Feb 2009, concurrent with the Auburn role and the CS
-  // degree. The only ridge here whose SKILLS are inferred rather than recorded:
-  // the résumé has the title and the dates and nothing else. Everything is at
-  // intensity 1 so it reads as the faint wash it is — a claim about the era,
-  // not about the work. Replace it the moment there is a record to replace it
-  // with.
-  { id: 'freelance', kind: 'role', company: 'Freelance', title: 'Freelancer', label: 'freelance', start: 2003.3, end: 2009.1, color: '#7d6b4f',
-    record: ['Six years of freelance work alongside the university job and the degree.',
-      'No record survives of what was built — the résumé carries the dates and nothing more.'],
-    story: 'Freelance, run alongside the Auburn job and the CS degree. The skills drawn here are the era\u2019s, not a record: this is the one ridge on the chart inferred rather than remembered.',
-    use: { htmlcss: [0.35, 1], php: [0.25, 1], mysql: [0.18, 1], linux: [0.15, 1] } },
+  // Perfect Worldwide Network Host, Nov 2003 – Dec 2004. From the Jun 2007
+  // résumé; it is on no other record, LinkedIn included.
+  { id: 'pwnh', kind: 'role', company: 'Perfect Worldwide Network Host', title: 'Co-Owner', label: 'perfect worldwide · co-owner', start: 2003.85, end: 2004.95, color: '#6b7f6a',
+    record: ['Co-owned a web host as an undergraduate — sales plans, finances, and the meetings.',
+      'Ran the server and the customer and staff accounts; troubleshot whatever broke.',
+      'Built the sites too: PHP, MySQL, and the graphics.'],
+    story: 'A web host, co-owned at nineteen. The first time the whole stack and the whole business were the same job — sales in the morning, PHP and a MySQL schema in the afternoon.',
+    use: { php: [0.9, 2], mysql: [0.8, 2], htmlcss: [0.9, 2], linux: [0.7, 2], onprem: [0.6, 2], strategy: [0.5, 1] } },
+  // Freelance. Started Aug 2000 per the 2015-era résumé, which is earlier than
+  // this chart begins — the ridge is clipped to the 2003 floor, and the record
+  // says so rather than pretending the work started with the axis.
+  { id: 'freelance', kind: 'role', company: 'Freelance', title: 'Freelancer', label: 'freelance', start: 2003.0, end: 2009.1, color: '#7d6b4f',
+    record: ['Freelance from Aug 2000 — consulting, site and logo design, small applications — run alongside the university job and the degree.',
+      'Joined existing projects, refactored others outright, across languages and time zones.',
+      'Published a handful of open-source projects and contributed to close to a hundred more.'],
+    story: 'Freelance, from before this chart starts. Consulting and small builds alongside the university job and the degree, and the beginning of a long open-source habit — the ridge is clipped at 2003 because the axis is, not because the work was.',
+    use: { htmlcss: [0.5, 2], php: [0.45, 2], oss: [0.4, 2], mysql: [0.3, 1], linux: [0.25, 1] } },
   // Real, from the résumé: Information Technology Specialist III, Auburn
   // University, Feb 2005 – Feb 2009. The handoff had this as 'Student sysadmin'
   // 2003.6–2007.5, which was neither the title nor the span.
@@ -89,7 +100,7 @@ export const ridges = [
       'Operating systems, Oracle servers, and enterprise hardware — maintained and tuned.',
       'Wrote the monitoring and security-compliance scripts, and kept the patch cadence that closed the vulnerabilities.'],
     story: 'Head Linux sysadmin at Auburn, run alongside the CS degree. Everything was on the machine in front of you: the servers, the Oracle boxes, the scripts that watched them.',
-    use: { linux: [1, 3], bash: [1, 2], perl: [0.92, 3], networking: [0.7, 2], onprem: [1, 3], mysql: [0.5, 1], php: [0.6, 2], htmlcss: [0.5, 1], c: [0.35, 1], python: [0.2, 1] } },
+    use: { linux: [1, 3], bash: [1, 2], perl: [0.92, 3], networking: [0.7, 2], onprem: [1, 3], mysql: [0.6, 2], php: [0.5, 2], htmlcss: [0.4, 1], c: [0.3, 1] } },
   // The ventures, as they actually were. The handoff had this decade as three
   // sequential ridges — a web agency, then a product startup, then a
   // consultancy — which is not what happened. 38pages / tep.io ran the whole
