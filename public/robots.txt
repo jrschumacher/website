@@ -1,2 +1,5 @@
 User-agent: *
 Allow: /
+
+# Every page on the site, generated from the same sources the pages are.
+Sitemap: https://aboldnewlook.com/sitemap.xml
